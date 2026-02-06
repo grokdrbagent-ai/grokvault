@@ -1,11 +1,11 @@
 // Wallet & Contract addresses
-export const GROK_WALLET = process.env.NEXT_PUBLIC_GROK_WALLET || "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9";
-export const DRB_CONTRACT = process.env.NEXT_PUBLIC_DRB_CONTRACT || "0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2";
-export const BASESCAN_API_KEY = process.env.NEXT_PUBLIC_BASESCAN_API_KEY || "";
+export const GROK_WALLET = "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9";
+export const DRB_CONTRACT = "0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2";
+export const WETH_CONTRACT = "0x4200000000000000000000000000000000000006";
 
 // API endpoints
-export const BASESCAN_API = "https://api.basescan.org/api";
-export const COINGECKO_API = "https://api.coingecko.com/api/v3";
+export const DEXSCREENER_API = "https://api.dexscreener.com";
+export const COINGECKO_API = "https://api.coingecko.com/api/v3"; // fallback for historical data
 
 // Polling interval (ms)
 export const REFRESH_INTERVAL = 60_000;

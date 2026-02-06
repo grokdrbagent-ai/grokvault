@@ -60,12 +60,12 @@ export function generateTweetText(
   level: Level,
   dailyEarnings: string
 ): string {
-  return `grok's wallet just hit ${totalValue} \u{1F3E6}
+  return `grok's wallet just hit ${totalValue}
 
-level ${level.level}: ${level.name} ${level.emoji}
-earning ${dailyEarnings} per day in swap fees
+lvl ${level.level}: ${level.name}
+earning ${dailyEarnings}/week in swap fees
 
-track it live \u2192 grokvault.vercel.app
+track it live: grokvault.vercel.app
 
-$DRB \u{1F3A9}\u{1F535}`;
+$DRB on Base`;
 }

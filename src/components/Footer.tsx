@@ -4,49 +4,44 @@ import { LINKS } from "@/lib/constants";
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/5 mt-12 py-6">
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-white/30">
-        <span>
-          Built by{" "}
-          <span className="text-[#0052FF]">draco.base.eth</span>{" "}
-          <span className="text-[#0052FF]">{"🔵"}</span>
-        </span>
-        <span className="hidden sm:inline text-white/10">|</span>
+    <footer className="mt-16 pt-6 pb-8">
+      <div className="glow-divider mb-6" />
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] font-mono">
         <a
           href={LINKS.buyDRB}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#00FF88] hover:text-[#00FF88]/80 transition-colors"
+          className="text-[#39FF14]/50 hover:text-[#39FF14] transition-colors"
         >
-          Buy $DRB
+          buy $DRB
         </a>
-        <span className="hidden sm:inline text-white/10">|</span>
         <a
           href={LINKS.community}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-white/50 transition-colors"
+          className="text-white/20 hover:text-white/50 transition-colors"
         >
-          Community
+          community
         </a>
-        <span className="hidden sm:inline text-white/10">|</span>
         <a
           href={LINKS.twitter}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-white/50 transition-colors"
+          className="text-white/20 hover:text-white/50 transition-colors"
         >
-          Twitter
+          twitter
         </a>
-        <span className="hidden sm:inline text-white/10">|</span>
         <a
           href={LINKS.grokWallet}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-white/50 transition-colors"
+          className="text-white/20 hover:text-white/50 transition-colors"
         >
-          View Wallet
+          view wallet
         </a>
+      </div>
+      <div className="text-center mt-4 text-[10px] text-white/10 font-mono">
+        built by draco.base.eth
       </div>
     </footer>
   );

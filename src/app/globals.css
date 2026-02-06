@@ -1,49 +1,182 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #0a0a0a;
-  --color-foreground: #ededed;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: #050505;
+  --color-foreground: #e8e8e8;
+  --font-sans: var(--font-chakra);
+  --font-mono: var(--font-jetbrains);
 }
+
+/* === BASE === */
 
 body {
-  background: #0a0a0a;
-  color: #ededed;
-  font-family: var(--font-mono), "JetBrains Mono", "Source Code Pro", monospace;
+  background: #050505;
+  color: #e8e8e8;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  overflow-x: hidden;
 }
 
-/* Glow effect for achieved milestones */
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.15); }
-  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+/* Subtle dot grid */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(57, 255, 20, 0.035) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.milestone-glow {
-  animation: glow 3s ease-in-out infinite;
+/* Ambient top glow */
+body::after {
+  content: "";
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 50%;
+  background: radial-gradient(ellipse, rgba(57, 255, 20, 0.035) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Pulse for level badge */
-@keyframes pulse-glow {
-  0%, 100% { text-shadow: 0 0 8px rgba(0, 82, 255, 0.3); }
-  50% { text-shadow: 0 0 24px rgba(0, 82, 255, 0.6); }
+/* === COLORS === */
+
+:root {
+  --green: #39FF14;
+  --cyan: #00EAFF;
+  --pink: #FF2D55;
+  --amber: #FFB800;
+  --green-dim: rgba(57, 255, 20, 0.15);
+  --green-glow: rgba(57, 255, 20, 0.3);
+  --cyan-dim: rgba(0, 234, 255, 0.15);
 }
 
-.level-pulse {
-  animation: pulse-glow 2s ease-in-out infinite;
+/* === ANIMATIONS === */
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--green), 0 0 8px var(--green-dim); }
+  50% { opacity: 0.4; box-shadow: 0 0 2px var(--green); }
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
+@keyframes value-pulse {
+  0%, 100% { text-shadow: 0 0 30px rgba(57, 255, 20, 0.15), 0 0 60px rgba(57, 255, 20, 0.03); }
+  50% { text-shadow: 0 0 50px rgba(57, 255, 20, 0.3), 0 0 100px rgba(57, 255, 20, 0.08); }
+}
+
+@keyframes border-breathe {
+  0%, 100% { border-color: rgba(57, 255, 20, 0.06); }
+  50% { border-color: rgba(57, 255, 20, 0.12); }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes progress-glow {
+  0%, 100% { box-shadow: 0 0 8px var(--green-dim); }
+  50% { box-shadow: 0 0 20px var(--green-glow); }
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-140px) scale(0.3); opacity: 0; }
+}
+
+/* === UTILITIES === */
+
+.live-dot {
   width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+.value-glow {
+  animation: value-pulse 3s ease-in-out infinite;
 }
+
+.card-glow {
+  border: 1px solid rgba(57, 255, 20, 0.06);
+  background: rgba(255, 255, 255, 0.008);
+  animation: border-breathe 5s ease-in-out infinite;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.card-glow:hover {
+  border-color: rgba(57, 255, 20, 0.18);
+  box-shadow: 0 0 30px rgba(57, 255, 20, 0.04);
+}
+
+.font-display {
+  font-family: var(--font-chakra), "Chakra Petch", sans-serif;
+}
+
+/* Achievement badges */
+.badge-achieved {
+  border-color: var(--green) !important;
+  background: rgba(57, 255, 20, 0.05);
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.08);
+}
+.badge-locked {
+  border-color: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.01);
+  opacity: 0.35;
+}
+
+/* Progress */
+.progress-track {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.progress-fill {
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  animation: progress-glow 3s ease-in-out infinite;
+}
+
+/* Scan line */
+.scan-overlay::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.05), transparent);
+  animation: scan-line 8s linear infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Glow divider */
+.glow-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.12), transparent);
+}
+
+/* Particle burst */
+.particle {
+  position: fixed;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green), 0 0 12px var(--green-dim);
+  pointer-events: none;
+  animation: float-up 2s ease-out forwards;
+}
+
+/* === SCROLLBAR === */
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  background: rgba(57, 255, 20, 0.12);
+  border-radius: 2px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+::-webkit-scrollbar-thumb:hover { background: rgba(57, 255, 20, 0.25); }
+
+::selection {
+  background: rgba(57, 255, 20, 0.2);
+  color: #fff;
 }

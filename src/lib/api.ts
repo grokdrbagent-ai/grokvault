@@ -1,92 +1,229 @@
-import { BASESCAN_API, BASESCAN_API_KEY, COINGECKO_API, GROK_WALLET, DRB_CONTRACT } from "./constants";
+import { DEXSCREENER_API, COINGECKO_API, GROK_WALLET, DRB_CONTRACT, WETH_CONTRACT } from "./constants";
 
-// --- BaseScan API ---
+const BASE_RPC = "https://mainnet.base.org";
 
-export async function fetchETHBalance(): Promise<number> {
-  const url = `${BASESCAN_API}?module=account&action=balance&address=${GROK_WALLET}&tag=latest&apikey=${BASESCAN_API_KEY}`;
-  const res = await fetch(url);
+// --- Base RPC helpers ---
+
+async function rpcCall(method: string, params: unknown[]): Promise<unknown> {
+  const res = await fetch(BASE_RPC, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 }),
+  });
   const data = await res.json();
-  if (data.status !== "1") throw new Error(data.message || "Failed to fetch ETH balance");
-  return parseInt(data.result) / 1e18;
+  if (data.error) throw new Error(data.error.message || "RPC error");
+  return data.result;
+}
+
+// --- Balances via RPC ---
+
+export async function fetchWETHBalance(): Promise<number> {
+  const paddedAddress = "000000000000000000000000" + GROK_WALLET.slice(2);
+  const data = `0x70a08231${paddedAddress}`;
+  const result = (await rpcCall("eth_call", [{ to: WETH_CONTRACT, data }, "latest"])) as string;
+  return parseInt(result, 16) / 1e18;
 }
 
 export async function fetchDRBBalance(): Promise<number> {
-  const url = `${BASESCAN_API}?module=account&action=tokenbalance&contractaddress=${DRB_CONTRACT}&address=${GROK_WALLET}&tag=latest&apikey=${BASESCAN_API_KEY}`;
+  const paddedAddress = "000000000000000000000000" + GROK_WALLET.slice(2);
+  const data = `0x70a08231${paddedAddress}`;
+  const result = (await rpcCall("eth_call", [{ to: DRB_CONTRACT, data }, "latest"])) as string;
+  return parseInt(result, 16) / 1e18;
+}
+
+// --- Prices via DexScreener ---
+
+export interface PriceData {
+  usd: number;
+  usd_24h_change: number;
+}
+
+export async function fetchPrices(): Promise<{ ethPrice: PriceData; drbPrice: PriceData }> {
+  const url = `${DEXSCREENER_API}/latest/dex/tokens/${DRB_CONTRACT}`;
   const res = await fetch(url);
   const data = await res.json();
-  if (data.status !== "1") throw new Error(data.message || "Failed to fetch DRB balance");
-  return parseInt(data.result) / 1e18;
+  const pair = data.pairs?.[0];
+
+  if (!pair) {
+    return {
+      ethPrice: { usd: 0, usd_24h_change: 0 },
+      drbPrice: { usd: 0, usd_24h_change: 0 },
+    };
+  }
+
+  const drbPriceUsd = parseFloat(pair.priceUsd || "0");
+  const priceNative = parseFloat(pair.priceNative || "0");
+  const ethPriceUsd = priceNative > 0 ? drbPriceUsd / priceNative : 0;
+  const drbChange24h = pair.priceChange?.h24 ?? 0;
+
+  return {
+    drbPrice: { usd: drbPriceUsd, usd_24h_change: drbChange24h },
+    // ETH 24h change not available from DexScreener pair, approximate as 0
+    ethPrice: { usd: ethPriceUsd, usd_24h_change: 0 },
+  };
 }
+
+// --- Recent fee income via Transfer events ---
 
 export interface TokenTransfer {
   hash: string;
   from: string;
   to: string;
   value: string;
-  timeStamp: string;
-  tokenName: string;
-  tokenSymbol: string;
+  token: "DRB" | "WETH";
+  blockNumber: string;
+  timestamp: number;
 }
 
-export async function fetchRecentFees(offset = 50): Promise<TokenTransfer[]> {
-  const url = `${BASESCAN_API}?module=account&action=tokentx&address=${GROK_WALLET}&contractaddress=${DRB_CONTRACT}&page=1&offset=${offset}&sort=desc&apikey=${BASESCAN_API_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.status !== "1") return [];
-  return data.result as TokenTransfer[];
+const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+const GROK_WALLET_PADDED = "0x000000000000000000000000" + GROK_WALLET.slice(2);
+
+// Scan a chunk for Transfer events of a specific token TO Grok wallet
+async function scanTokenChunk(
+  tokenAddress: string,
+  tokenName: "DRB" | "WETH",
+  fromBlock: string,
+  toBlock: string
+): Promise<TokenTransfer[]> {
+  try {
+    const logs = (await rpcCall("eth_getLogs", [
+      {
+        address: tokenAddress,
+        topics: [TRANSFER_TOPIC, null, GROK_WALLET_PADDED],
+        fromBlock,
+        toBlock,
+      },
+    ])) as Array<{
+      transactionHash: string;
+      topics: string[];
+      data: string;
+      blockNumber: string;
+    }>;
+
+    return logs.map((log) => ({
+      hash: log.transactionHash,
+      from: "0x" + log.topics[1].slice(26),
+      to: "0x" + log.topics[2].slice(26),
+      value: (parseInt(log.data, 16) / 1e18).toString(),
+      token: tokenName,
+      blockNumber: log.blockNumber,
+      timestamp: 0,
+    }));
+  } catch {
+    return [];
+  }
 }
 
-// --- CoinGecko API ---
+export async function fetchRecentFees(): Promise<TokenTransfer[]> {
+  try {
+    const currentBlockHex = (await rpcCall("eth_blockNumber", [])) as string;
+    const currentBlock = parseInt(currentBlockHex, 16);
+    const currentTimestamp = Math.floor(Date.now() / 1000);
 
-export async function fetchETHPrice(): Promise<number> {
-  const url = `${COINGECKO_API}/simple/price?ids=ethereum&vs_currencies=usd`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.ethereum?.usd ?? 0;
+    // Scan last ~7 days in 10K-block chunks (Base ~2s blocks)
+    const CHUNK_SIZE = 10000;
+    const TOTAL_BLOCKS = 302400; // ~7 days
+    const allTransfers: TokenTransfer[] = [];
+
+    // Build chunk queries: DRB and WETH Transfer events separately
+    const chunkQueries: Array<() => Promise<TokenTransfer[]>> = [];
+    for (let offset = 0; offset < TOTAL_BLOCKS; offset += CHUNK_SIZE) {
+      const from = "0x" + (currentBlock - offset - CHUNK_SIZE).toString(16);
+      const to = "0x" + (currentBlock - offset).toString(16);
+      chunkQueries.push(() => scanTokenChunk(DRB_CONTRACT, "DRB", from, to));
+      chunkQueries.push(() => scanTokenChunk(WETH_CONTRACT, "WETH", from, to));
+    }
+
+    // Run in batches of 8 to maximize throughput
+    for (let i = 0; i < chunkQueries.length; i += 8) {
+      const batch = chunkQueries.slice(i, i + 8);
+      const results = await Promise.all(batch.map((fn) => fn()));
+      for (const transfers of results) {
+        allTransfers.push(...transfers);
+      }
+    }
+
+    // Estimate timestamps based on block number difference from current
+    for (const tx of allTransfers) {
+      const blockDiff = currentBlock - parseInt(tx.blockNumber, 16);
+      tx.timestamp = currentTimestamp - blockDiff * 2; // ~2s per block
+    }
+
+    // Sort by block number descending (most recent first)
+    allTransfers.sort((a, b) => parseInt(b.blockNumber, 16) - parseInt(a.blockNumber, 16));
+
+    return allTransfers;
+  } catch {
+    return [];
+  }
 }
 
-export async function fetchDRBPrice(): Promise<number> {
-  const url = `${COINGECKO_API}/simple/token_price/base?contract_addresses=${DRB_CONTRACT}&vs_currencies=usd`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data[DRB_CONTRACT.toLowerCase()]?.usd ?? 0;
+// --- Historical price data ---
+
+export interface PricePoint {
+  timestamp: number;
+  price: number;
+}
+
+export async function fetchDRBPriceHistory(days = 7): Promise<PricePoint[]> {
+  try {
+    // Try CoinGecko for historical data (may work even if simple price doesn't)
+    const url = `${COINGECKO_API}/coins/base/contract/${DRB_CONTRACT}/market_chart/?vs_currency=usd&days=${days}`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.prices ?? []).map(([timestamp, price]: [number, number]) => ({
+      timestamp,
+      price,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 // --- Combined fetch ---
 
 export interface WalletData {
-  ethBalance: number;
+  wethBalance: number;
   drbBalance: number;
   ethPrice: number;
   drbPrice: number;
   totalValueUSD: number;
-  ethValueUSD: number;
+  wethValueUSD: number;
   drbValueUSD: number;
+  change24hPercent: number;
   recentFees: TokenTransfer[];
   lastUpdated: number;
 }
 
 export async function fetchAllWalletData(): Promise<WalletData> {
-  const [ethBalance, drbBalance, ethPrice, drbPrice, recentFees] = await Promise.all([
-    fetchETHBalance(),
+  const [wethBalance, drbBalance, prices, recentFees] = await Promise.all([
+    fetchWETHBalance(),
     fetchDRBBalance(),
-    fetchETHPrice(),
-    fetchDRBPrice(),
+    fetchPrices(),
     fetchRecentFees(),
   ]);
 
-  const ethValueUSD = ethBalance * ethPrice;
+  const ethPrice = prices.ethPrice.usd;
+  const drbPrice = prices.drbPrice.usd;
+  const wethValueUSD = wethBalance * ethPrice;
   const drbValueUSD = drbBalance * drbPrice;
-  const totalValueUSD = ethValueUSD + drbValueUSD;
+  const totalValueUSD = wethValueUSD + drbValueUSD;
+
+  const ethWeight = totalValueUSD > 0 ? wethValueUSD / totalValueUSD : 0.5;
+  const drbWeight = totalValueUSD > 0 ? drbValueUSD / totalValueUSD : 0.5;
+  const change24hPercent =
+    prices.ethPrice.usd_24h_change * ethWeight + prices.drbPrice.usd_24h_change * drbWeight;
 
   return {
-    ethBalance,
+    wethBalance,
     drbBalance,
     ethPrice,
     drbPrice,
     totalValueUSD,
-    ethValueUSD,
+    wethValueUSD,
     drbValueUSD,
+    change24hPercent,
     recentFees,
     lastUpdated: Date.now(),
   };

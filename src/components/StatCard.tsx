@@ -10,20 +10,23 @@ interface StatCardProps {
   delay?: number;
 }
 
-export function StatCard({ label, value, subValue, icon, delay = 0 }: StatCardProps) {
+export function StatCard({ label, value, subValue, delay = 0 }: StatCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
-      className="rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm"
+      className="card-glow rounded-lg px-5 py-4"
     >
-      <div className="text-xs uppercase tracking-wider text-white/40 mb-2">
-        {icon && <span className="mr-1">{icon}</span>}
+      <div className="text-[10px] uppercase tracking-[0.2em] text-white/25 mb-3 font-display">
         {label}
       </div>
-      <div className="text-xl font-bold text-white font-mono">{value}</div>
-      <div className="text-sm text-white/50 mt-1 font-mono">{subValue}</div>
+      <div className="text-lg font-semibold font-display tracking-tight text-white">
+        {value}
+      </div>
+      <div className="text-xs text-white/30 mt-1">
+        {subValue}
+      </div>
     </motion.div>
   );
 }
