@@ -1,64 +1,213 @@
-import Image from "next/image";
+"use client";
+
+import { motion } from "framer-motion";
+import { useWalletData } from "@/hooks/useWalletData";
+import { getLevel, getNextLevel, getProgress, getMilestones, formatUSD, formatTokenAmount } from "@/lib/game";
+import { CounterAnimation } from "@/components/CounterAnimation";
+import { ProgressBar } from "@/components/ProgressBar";
+import { StatCard } from "@/components/StatCard";
+import { Milestones } from "@/components/Milestones";
+import { RecentFees } from "@/components/RecentFees";
+import { ShareButton } from "@/components/ShareButton";
+import { Footer } from "@/components/Footer";
+import { LINKS } from "@/lib/constants";
+
+function LoadingScreen() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-center">
+        <div className="text-4xl mb-4 animate-pulse">{"🏦"}</div>
+        <div className="text-sm text-white/40 font-mono">Loading GrokVault...</div>
+        <div className="mt-4 w-48 h-1 bg-white/5 rounded-full overflow-hidden mx-auto">
+          <div className="h-full bg-[#0052FF] rounded-full animate-pulse" style={{ width: "60%" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ErrorScreen({ error, onRetry }: { error: string; onRetry: () => void }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-center">
+        <div className="text-4xl mb-4">{"⚠️"}</div>
+        <div className="text-sm text-white/40 font-mono mb-2">Data unavailable</div>
+        <div className="text-xs text-red-400/60 font-mono mb-4">{error}</div>
+        <button
+          onClick={onRetry}
+          className="text-xs text-[#0052FF] hover:text-[#0052FF]/80 font-mono transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
+  const { data, loading, error, refetch } = useWalletData();
+
+  if (loading) return <LoadingScreen />;
+  if (error && !data) return <ErrorScreen error={error} onRetry={refetch} />;
+  if (!data) return <LoadingScreen />;
+
+  const level = getLevel(data.totalValueUSD);
+  const nextLevel = getNextLevel(data.totalValueUSD);
+  const progress = getProgress(data.totalValueUSD);
+  const milestones = getMilestones(data.totalValueUSD);
+
+  // Calculate daily earnings from recent fees (last 24h)
+  const oneDayAgo = Date.now() / 1000 - 86400;
+  const dailyFees = data.recentFees
+    .filter(
+      (f) =>
+        f.to.toLowerCase() === "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9" &&
+        parseInt(f.timeStamp) > oneDayAgo
+    )
+    .reduce((sum, f) => sum + parseInt(f.value) / 1e18, 0);
+  const dailyEarningsUSD = dailyFees * data.drbPrice;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/* Header */}
+      <header className="border-b border-white/5">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">{"🏦"}</span>
+            <span className="font-bold text-lg tracking-tight">GROKVAULT</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <ShareButton
+              totalValue={data.totalValueUSD}
+              level={level}
+              dailyEarnings={dailyEarningsUSD}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <a
+              href={LINKS.grokWallet}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-white/30 hover:text-white/50 transition-colors"
+            >
+              draco.base.eth <span className="text-[#0052FF]">{"🔵"}</span>
+            </a>
+          </div>
         </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* Level & Total Value */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10"
+        >
+          <div className="text-xs uppercase tracking-widest text-white/30 mb-3">
+            {"Grok's Wallet"}
+          </div>
+
+          {/* Level Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#0052FF]/10 border border-[#0052FF]/20 px-4 py-1.5 mb-4">
+            <span className="text-lg level-pulse">{level.emoji}</span>
+            <span className="text-sm font-semibold text-[#0052FF]">
+              Level {level.level}: {level.name}
+            </span>
+          </div>
+
+          {/* Total Value */}
+          <div className="mb-2">
+            <CounterAnimation
+              value={data.totalValueUSD}
+              prefix="$"
+              decimals={0}
+              className="text-5xl sm:text-6xl font-bold tracking-tight"
+            />
+          </div>
+
+          {/* Daily change indicator */}
+          {dailyEarningsUSD > 0 && (
+            <div className="text-sm text-[#00FF88] font-mono">
+              +{formatUSD(dailyEarningsUSD)} today from swap fees
+            </div>
+          )}
+        </motion.section>
+
+        {/* Stat Cards */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+          <StatCard
+            label="ETH Balance"
+            value={`${data.ethBalance.toFixed(2)} ETH`}
+            subValue={formatUSD(data.ethValueUSD)}
+            delay={0.1}
+          />
+          <StatCard
+            label="$DRB Balance"
+            value={`${formatTokenAmount(data.drbBalance)} DRB`}
+            subValue={formatUSD(data.drbValueUSD)}
+            delay={0.2}
+          />
+          <StatCard
+            label="Daily Earnings"
+            value={formatUSD(dailyEarningsUSD)}
+            subValue={`${formatTokenAmount(dailyFees)} DRB`}
+            icon={"\u2191"}
+            delay={0.3}
+          />
+        </section>
+
+        {/* Progress to Next Level */}
+        {nextLevel && (
+          <motion.section
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="mb-10"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-white/40 uppercase tracking-wider">
+                Next: {nextLevel.name} {nextLevel.emoji}
+              </span>
+              <span className="text-xs text-white/40 font-mono">
+                {formatUSD(nextLevel.minValue)} &middot; {progress.toFixed(1)}%
+              </span>
+            </div>
+            <ProgressBar progress={progress} />
+          </motion.section>
+        )}
+
+        {/* Milestones */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mb-10"
+        >
+          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-4">
+            Achievements
+          </h2>
+          <Milestones milestones={milestones} />
+        </motion.section>
+
+        {/* Recent Fees */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="mb-10"
+        >
+          <h2 className="text-xs uppercase tracking-widest text-white/30 mb-4">
+            Recent Fees
+          </h2>
+          <RecentFees fees={data.recentFees} drbPrice={data.drbPrice} />
+        </motion.section>
+
+        {/* Last updated */}
+        <div className="text-center text-[10px] text-white/20 font-mono">
+          Last updated: {new Date(data.lastUpdated).toLocaleTimeString()} &middot; Auto-refreshes every 60s
+        </div>
+
+        <Footer />
       </main>
     </div>
   );

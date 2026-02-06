@@ -1,0 +1,46 @@
+// Wallet & Contract addresses
+export const GROK_WALLET = process.env.NEXT_PUBLIC_GROK_WALLET || "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9";
+export const DRB_CONTRACT = process.env.NEXT_PUBLIC_DRB_CONTRACT || "0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2";
+export const BASESCAN_API_KEY = process.env.NEXT_PUBLIC_BASESCAN_API_KEY || "";
+
+// API endpoints
+export const BASESCAN_API = "https://api.basescan.org/api";
+export const COINGECKO_API = "https://api.coingecko.com/api/v3";
+
+// Polling interval (ms)
+export const REFRESH_INTERVAL = 60_000;
+
+// Level system
+export const LEVELS = [
+  { level: 1, name: "Broke Bot", minValue: 0, emoji: "\u{1F916}" },
+  { level: 2, name: "Pocket Change", minValue: 10_000, emoji: "\u{1FA99}" },
+  { level: 3, name: "Side Hustle", minValue: 50_000, emoji: "\u{1F4B0}" },
+  { level: 4, name: "Six Figure Degen", minValue: 100_000, emoji: "\u{1F525}" },
+  { level: 5, name: "Half Mill Club", minValue: 500_000, emoji: "\u{1F48E}" },
+  { level: 6, name: "Millionaire Bot", minValue: 1_000_000, emoji: "\u{1F3C6}" },
+  { level: 7, name: "Whale Status", minValue: 2_000_000, emoji: "\u{1F40B}" },
+  { level: 8, name: "Crypto Overlord", minValue: 5_000_000, emoji: "\u{1F451}" },
+  { level: 9, name: "Base Legend", minValue: 10_000_000, emoji: "\u2B50" },
+  { level: 10, name: "AI Tycoon", minValue: 50_000_000, emoji: "\u{1F9E0}" },
+] as const;
+
+// Milestones
+export const MILESTONES = [
+  { label: "$10K", value: 10_000, emoji: "\u{1F949}" },
+  { label: "$50K", value: 50_000, emoji: "\u{1F948}" },
+  { label: "$100K", value: 100_000, emoji: "\u{1F947}" },
+  { label: "$500K", value: 500_000, emoji: "\u{1F48E}" },
+  { label: "$1M", value: 1_000_000, emoji: "\u{1F3C6}" },
+  { label: "$2M", value: 2_000_000, emoji: "\u{1F40B}" },
+  { label: "$5M", value: 5_000_000, emoji: "\u{1F451}" },
+  { label: "$10M", value: 10_000_000, emoji: "\u{1F31F}" },
+] as const;
+
+// External links
+export const LINKS = {
+  buyDRB: "https://app.uniswap.org/swap?outputCurrency=0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2&chain=base",
+  community: "https://t.me/agentstoagents",
+  twitter: "https://x.com/agentstoagents",
+  grokWallet: "https://basescan.org/address/0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9",
+  drbContract: "https://basescan.org/token/0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2",
+} as const;
