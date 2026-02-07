@@ -4,7 +4,7 @@ const BASE_RPC = "https://mainnet.base.org";
 
 // --- Base RPC helpers ---
 
-async function rpcCall(method: string, params: unknown[]): Promise<unknown> {
+export async function rpcCall(method: string, params: unknown[]): Promise<unknown> {
   const res = await fetch(BASE_RPC, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

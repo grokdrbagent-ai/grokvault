@@ -3,6 +3,10 @@
 import { motion } from "framer-motion";
 import { useWalletData } from "@/hooks/useWalletData";
 import { usePriceHistory } from "@/hooks/usePriceHistory";
+import { usePersonalATH } from "@/hooks/usePersonalATH";
+import { useDynamicFavicon } from "@/hooks/useDynamicFavicon";
+import { useStatusMessage } from "@/hooks/useStatusMessage";
+import { useLargeBuys } from "@/hooks/useLargeBuys";
 import {
   getLevel,
   getNextLevel,
@@ -19,6 +23,13 @@ import { ShareButton } from "@/components/ShareButton";
 import { SparklineChart } from "@/components/SparklineChart";
 import { CoinRain } from "@/components/CoinRain";
 import { Footer } from "@/components/Footer";
+import { PersonalATH } from "@/components/PersonalATH";
+import { StatusMessage } from "@/components/StatusMessage";
+import { MilestoneCountdown } from "@/components/MilestoneCountdown";
+import { FunComparison } from "@/components/FunComparison";
+import { ActivityTicker } from "@/components/ActivityTicker";
+import { PriceSimulator } from "@/components/PriceSimulator";
+import { LargeBuysFeed } from "@/components/LargeBuysFeed";
 import { LINKS } from "@/lib/constants";
 
 function LoadingScreen() {
@@ -66,6 +77,28 @@ export default function Home() {
   const { data, loading, error, newFeeCount } = useWalletData();
   const priceHistory = usePriceHistory(7);
 
+  // New hooks
+  const { ath, isNewATH } = usePersonalATH(data?.totalValueUSD ?? null);
+  useDynamicFavicon(data?.change24hPercent ?? null);
+
+  const earningsUSD = data
+    ? data.recentFees.reduce((sum, f) => {
+        const amount = parseFloat(f.value);
+        const price = f.token === "DRB" ? data.drbPrice : data.ethPrice;
+        return sum + amount * price;
+      }, 0)
+    : 0;
+
+  const { message: statusMessage, tone: statusTone } = useStatusMessage(
+    data?.totalValueUSD ?? null,
+    data?.change24hPercent ?? null,
+    earningsUSD
+  );
+
+  const { buys: largeBuys, loading: largeBuysLoading } = useLargeBuys(
+    data?.drbPrice ?? null
+  );
+
   if (loading) return <LoadingScreen />;
   if (error && !data) return <ErrorScreen error={error} />;
   if (!data) return <LoadingScreen />;
@@ -74,12 +107,7 @@ export default function Home() {
   const nextLevel = getNextLevel(data.totalValueUSD);
   const progress = getProgress(data.totalValueUSD);
   const milestones = getMilestones(data.totalValueUSD);
-
-  const earningsUSD = data.recentFees.reduce((sum, f) => {
-    const amount = parseFloat(f.value);
-    const price = f.token === "DRB" ? data.drbPrice : data.ethPrice;
-    return sum + amount * price;
-  }, 0);
+  const dailyFeeRate = earningsUSD / 7;
 
   return (
     <div className="relative min-h-screen text-white z-10">
@@ -115,6 +143,14 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Activity Ticker — F7 */}
+      <ActivityTicker
+        recentFees={data.recentFees}
+        drbPrice={data.drbPrice}
+        ethPrice={data.ethPrice}
+        totalValueUSD={data.totalValueUSD}
+      />
+
       {/* Main */}
       <main className="max-w-4xl mx-auto px-4 py-10">
         {/* Hero: Net Worth */}
@@ -127,6 +163,9 @@ export default function Home() {
           <div className="text-[10px] uppercase tracking-[0.3em] text-white/20 mb-4 font-mono">
             net worth
           </div>
+
+          {/* Status Message — F2 */}
+          <StatusMessage message={statusMessage} tone={statusTone} />
 
           {/* Level Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-[#39FF14]/15 bg-[#39FF14]/[0.03] px-4 py-1.5 mb-5">
@@ -167,6 +206,12 @@ export default function Home() {
               +{formatUSD(earningsUSD)} fee income (7d)
             </div>
           )}
+
+          {/* Personal ATH — F5 */}
+          <PersonalATH ath={ath} isNewATH={isNewATH} />
+
+          {/* Fun Comparison — F8 */}
+          <FunComparison currentValue={data.totalValueUSD} />
         </motion.section>
 
         {/* Stat Cards */}
@@ -216,6 +261,17 @@ export default function Home() {
           </div>
         </motion.section>
 
+        {/* What If Simulator — F6 */}
+        <PriceSimulator
+          currentDRBPrice={data.drbPrice}
+          drbBalance={data.drbBalance}
+          wethValueUSD={data.wethValueUSD}
+          currentTotalValue={data.totalValueUSD}
+        />
+
+        {/* Large Buys Feed — F9 */}
+        <LargeBuysFeed buys={largeBuys} loading={largeBuysLoading} />
+
         {/* Progress to Next Level */}
         {nextLevel && (
           <motion.section
@@ -234,6 +290,13 @@ export default function Home() {
               </span>
             </div>
             <ProgressBar progress={progress} />
+
+            {/* Milestone Countdown — F1 */}
+            <MilestoneCountdown
+              currentValue={data.totalValueUSD}
+              nextLevel={nextLevel}
+              dailyFeeRate={dailyFeeRate}
+            />
           </motion.section>
         )}
 

@@ -85,6 +85,16 @@ body::after {
   100% { transform: translateY(-140px) scale(0.3); opacity: 0; }
 }
 
+@keyframes ath-glow-pulse {
+  0%, 100% { text-shadow: 0 0 6px rgba(0, 234, 255, 0.3), 0 0 20px rgba(0, 234, 255, 0.1); }
+  50% { text-shadow: 0 0 12px rgba(0, 234, 255, 0.6), 0 0 40px rgba(0, 234, 255, 0.2); }
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* === UTILITIES === */
 
 .live-dot {
@@ -155,6 +165,60 @@ body::after {
   background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.12), transparent);
 }
 
+/* ATH glow */
+.ath-glow {
+  animation: ath-glow-pulse 2s ease-in-out infinite;
+}
+
+/* Activity Ticker */
+.ticker-container {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+.ticker-scroll {
+  display: inline-flex;
+  animation: ticker-scroll 30s linear infinite;
+}
+.ticker-content {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Simulator slider */
+.sim-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 1px;
+  outline: none;
+  cursor: pointer;
+}
+.sim-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-dim), 0 0 20px rgba(57, 255, 20, 0.1);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.sim-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 12px var(--green-glow), 0 0 30px rgba(57, 255, 20, 0.2);
+}
+.sim-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-dim);
+  border: none;
+  cursor: pointer;
+}
+
 /* Particle burst */
 .particle {
   position: fixed;
@@ -179,4 +243,17 @@ body::after {
 ::selection {
   background: rgba(57, 255, 20, 0.2);
   color: #fff;
+}
+
+/* === ACCESSIBILITY === */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

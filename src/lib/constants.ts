@@ -36,6 +36,11 @@ export const MILESTONES = [
   { label: "$10M", value: 10_000_000, emoji: "\u{1F31F}" },
 ] as const;
 
+// Uniswap V3 Pool (DRB/WETH)
+export const DRB_WETH_POOL = "0x5116773e18A9C7bB03EBB961b38678E45E238923";
+export const SWAP_EVENT_TOPIC = "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67";
+export const LARGE_BUY_THRESHOLD_USD = 10_000;
+
 // External links
 export const LINKS = {
   buyDRB: "https://app.uniswap.org/swap?outputCurrency=0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2&chain=base",
