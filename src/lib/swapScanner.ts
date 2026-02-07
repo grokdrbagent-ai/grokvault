@@ -119,7 +119,7 @@ export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[
 
     const buys = [...r1, ...r2, ...r3];
     buys.sort((a, b) => b.blockNumber - a.blockNumber);
-    return buys.slice(0, 10);
+    return buys.slice(0, 5);
   } catch {
     return [];
   }
