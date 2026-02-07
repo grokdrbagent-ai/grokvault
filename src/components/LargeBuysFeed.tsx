@@ -29,7 +29,7 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
           large buys
         </h2>
         <span className="text-[10px] text-white/25 font-mono">
-          $10K+ &middot; 7d
+          $1K+ &middot; 7d
         </span>
         <span className="flex-1" />
         <span className="text-[10px] text-white/25 font-mono">
@@ -49,7 +49,7 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
             no large buys detected in the last 7d
           </div>
           <div className="text-[10px] text-white/15 font-mono mt-1">
-            watching for $10K+ swaps
+            watching for $1K+ swaps
           </div>
         </div>
       ) : (
@@ -98,10 +98,15 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
                   {/* Spacer */}
                   <span className="flex-1" />
 
-                  {/* Address — always visible */}
-                  <span className="text-[10px] text-white/25 font-mono">
+                  {/* Address — clickable to Basescan */}
+                  <a
+                    href={`https://basescan.org/address/${buy.buyer}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-white/25 hover:text-white/50 font-mono transition-colors"
+                  >
                     {shortenAddress(buy.buyer)}
-                  </span>
+                  </a>
 
                   {/* Time ago */}
                   <span
