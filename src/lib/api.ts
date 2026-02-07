@@ -63,7 +63,7 @@ export async function fetchPrices(): Promise<{ ethPrice: PriceData; drbPrice: Pr
   };
 }
 
-// --- Recent fee income via Transfer events ---
+// --- Recent fee income via Transfer events (Blockscout indexed API) ---
 
 export interface TokenTransfer {
   hash: string;
@@ -77,41 +77,66 @@ export interface TokenTransfer {
 
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 const GROK_WALLET_PADDED = "0x000000000000000000000000" + GROK_WALLET.slice(2);
+const BLOCKSCOUT_V1 = BLOCKSCOUT_API.replace("/api/v2", "/api");
 
-// Scan a chunk for Transfer events of a specific token TO Grok wallet
-async function scanTokenChunk(
+// Scan fee transfers via Blockscout indexed API (paginated, up to 1000/page)
+async function scanFeeTransfers(
   tokenAddress: string,
   tokenName: "DRB" | "WETH",
-  fromBlock: string,
-  toBlock: string
+  fromBlock: number,
+  toBlock: number,
+  currentBlock: number,
+  currentTimestamp: number,
 ): Promise<TokenTransfer[]> {
-  try {
-    const logs = (await rpcCall("eth_getLogs", [
-      {
-        address: tokenAddress,
-        topics: [TRANSFER_TOPIC, null, GROK_WALLET_PADDED],
-        fromBlock,
-        toBlock,
-      },
-    ])) as Array<{
-      transactionHash: string;
-      topics: string[];
-      data: string;
-      blockNumber: string;
-    }>;
+  const transfers: TokenTransfer[] = [];
+  let cursor = fromBlock;
 
-    return logs.map((log) => ({
-      hash: log.transactionHash,
-      from: "0x" + log.topics[1].slice(26),
-      to: "0x" + log.topics[2].slice(26),
-      value: (parseInt(log.data, 16) / 1e18).toString(),
-      token: tokenName,
-      blockNumber: log.blockNumber,
-      timestamp: 0,
-    }));
-  } catch {
-    return [];
+  while (cursor <= toBlock) {
+    try {
+      const url =
+        `${BLOCKSCOUT_V1}?module=logs&action=getLogs` +
+        `&address=${tokenAddress}` +
+        `&topic0=${TRANSFER_TOPIC}` +
+        `&topic0_2_opr=and` +
+        `&topic2=${GROK_WALLET_PADDED}` +
+        `&fromBlock=${cursor}&toBlock=${toBlock}`;
+
+      const res = await fetch(url);
+      if (!res.ok) break;
+
+      const data = await res.json();
+      const logs: Array<{
+        transactionHash: string;
+        topics: string[];
+        data: string;
+        blockNumber: string;
+      }> = data.result ?? [];
+      if (logs.length === 0) break;
+
+      for (const log of logs) {
+        const blockNum = parseInt(log.blockNumber, 16);
+        const blockDiff = currentBlock - blockNum;
+        const timestamp = currentTimestamp - blockDiff * 2;
+
+        transfers.push({
+          hash: log.transactionHash,
+          from: log.topics[1] ? "0x" + log.topics[1].slice(26) : "unknown",
+          to: log.topics[2] ? "0x" + log.topics[2].slice(26) : "unknown",
+          value: (parseInt(log.data, 16) / 1e18).toString(),
+          token: tokenName,
+          blockNumber: log.blockNumber,
+          timestamp,
+        });
+      }
+
+      cursor = parseInt(logs[logs.length - 1].blockNumber, 16) + 1;
+      if (logs.length < 1000) break; // no more pages
+    } catch {
+      break;
+    }
   }
+
+  return transfers;
 }
 
 export async function fetchRecentFees(): Promise<TokenTransfer[]> {
@@ -120,36 +145,16 @@ export async function fetchRecentFees(): Promise<TokenTransfer[]> {
     const currentBlock = parseInt(currentBlockHex, 16);
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    // Scan last ~7 days in 10K-block chunks (Base ~2s blocks)
-    const CHUNK_SIZE = 10000;
-    const TOTAL_BLOCKS = 302400; // ~7 days
-    const allTransfers: TokenTransfer[] = [];
+    const TOTAL_BLOCKS = 302_400; // ~7 days
+    const startBlock = currentBlock - TOTAL_BLOCKS;
 
-    // Build chunk queries: DRB and WETH Transfer events separately
-    const chunkQueries: Array<() => Promise<TokenTransfer[]>> = [];
-    for (let offset = 0; offset < TOTAL_BLOCKS; offset += CHUNK_SIZE) {
-      const from = "0x" + (currentBlock - offset - CHUNK_SIZE).toString(16);
-      const to = "0x" + (currentBlock - offset).toString(16);
-      chunkQueries.push(() => scanTokenChunk(DRB_CONTRACT, "DRB", from, to));
-      chunkQueries.push(() => scanTokenChunk(WETH_CONTRACT, "WETH", from, to));
-    }
+    // 2 parallel Blockscout queries instead of ~60 RPC calls
+    const [drbTransfers, wethTransfers] = await Promise.all([
+      scanFeeTransfers(DRB_CONTRACT, "DRB", startBlock, currentBlock, currentBlock, currentTimestamp),
+      scanFeeTransfers(WETH_CONTRACT, "WETH", startBlock, currentBlock, currentBlock, currentTimestamp),
+    ]);
 
-    // Run in batches of 8 to maximize throughput
-    for (let i = 0; i < chunkQueries.length; i += 8) {
-      const batch = chunkQueries.slice(i, i + 8);
-      const results = await Promise.all(batch.map((fn) => fn()));
-      for (const transfers of results) {
-        allTransfers.push(...transfers);
-      }
-    }
-
-    // Estimate timestamps based on block number difference from current
-    for (const tx of allTransfers) {
-      const blockDiff = currentBlock - parseInt(tx.blockNumber, 16);
-      tx.timestamp = currentTimestamp - blockDiff * 2; // ~2s per block
-    }
-
-    // Sort by block number descending (most recent first)
+    const allTransfers = [...drbTransfers, ...wethTransfers];
     allTransfers.sort((a, b) => parseInt(b.blockNumber, 16) - parseInt(a.blockNumber, 16));
 
     return allTransfers;
