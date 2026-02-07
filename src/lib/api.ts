@@ -209,6 +209,9 @@ export async function fetchOtherTokens(ethPrice: number): Promise<OtherTokensDat
   const wethLower = WETH_CONTRACT.toLowerCase();
   const drbLower = DRB_CONTRACT.toLowerCase();
 
+  // First pass: tally tokens with prices, collect those without
+  const needPrice: { addr: string; balance: number }[] = [];
+
   for (const item of tokens) {
     const addr = (item.token?.address_hash ?? "").toLowerCase();
     if (addr === wethLower || addr === drbLower) continue;
@@ -218,12 +221,52 @@ export async function fetchOtherTokens(ethPrice: number): Promise<OtherTokensDat
 
     const rawValue = item.value ?? "0";
     const balance = Number(BigInt(rawValue)) / Math.pow(10, decimals);
-    const price = parseFloat(item.token?.exchange_rate ?? "0");
+    const rate = item.token?.exchange_rate;
+    const price = rate ? parseFloat(rate) : 0;
     const usdValue = balance * price;
 
-    if (usdValue > 1) {
+    if (price > 0 && usdValue > 1) {
       othersValueUSD += usdValue;
       othersTokenCount++;
+    } else if (balance > 0 && !price) {
+      needPrice.push({ addr, balance });
+    }
+  }
+
+  // Second pass: batch-fetch missing prices from DexScreener (max 30 per call)
+  if (needPrice.length > 0) {
+    // Sort by balance desc, take top 30
+    needPrice.sort((a, b) => b.balance - a.balance);
+    const batch = needPrice.slice(0, 30);
+    const addresses = batch.map((t) => t.addr).join(",");
+    try {
+      const dexRes = await fetch(`https://api.dexscreener.com/tokens/v1/base/${addresses}`);
+      if (dexRes.ok) {
+        const pairs = await dexRes.json();
+        if (Array.isArray(pairs)) {
+          // Build price map: lowest-address base token → priceUsd
+          const priceMap = new Map<string, number>();
+          for (const pair of pairs) {
+            const baseAddr = (pair.baseToken?.address ?? "").toLowerCase();
+            const priceUsd = parseFloat(pair.priceUsd ?? "0");
+            if (priceUsd > 0 && !priceMap.has(baseAddr)) {
+              priceMap.set(baseAddr, priceUsd);
+            }
+          }
+          for (const t of batch) {
+            const dexPrice = priceMap.get(t.addr);
+            if (dexPrice) {
+              const usdValue = t.balance * dexPrice;
+              if (usdValue > 1) {
+                othersValueUSD += usdValue;
+                othersTokenCount++;
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      // DexScreener fallback failed, continue without
     }
   }
 
