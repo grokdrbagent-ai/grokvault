@@ -27,20 +27,25 @@ interface SwapLog {
   topics: string[];
 }
 
-// Scan a single chunk of blocks for Swap events
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Scan a single chunk with retry on rate limit
 async function scanSwapChunk(fromBlock: string, toBlock: string): Promise<SwapLog[]> {
-  try {
-    return (await rpcCall("eth_getLogs", [
-      {
-        address: DRB_WETH_POOL,
-        topics: [SWAP_EVENT_TOPIC],
-        fromBlock,
-        toBlock,
-      },
-    ])) as SwapLog[];
-  } catch {
-    return [];
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return (await rpcCall("eth_getLogs", [
+        {
+          address: DRB_WETH_POOL,
+          topics: [SWAP_EVENT_TOPIC],
+          fromBlock,
+          toBlock,
+        },
+      ])) as SwapLog[];
+    } catch {
+      if (attempt < 2) await sleep(1000 * (attempt + 1));
+    }
   }
+  return [];
 }
 
 export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[]> {
@@ -49,26 +54,24 @@ export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[
     const currentBlock = parseInt(currentBlockHex, 16);
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    // Scan last ~7 days (302,400 blocks) in 50K-block chunks
-    const CHUNK_SIZE = 50_000;
+    // Scan last ~7 days (302,400 blocks) in 10K-block chunks with delays
+    const CHUNK_SIZE = 10_000;
     const TOTAL_BLOCKS = 302_400;
     const allLogs: SwapLog[] = [];
 
-    // Run chunks sequentially to avoid RPC rate limits
     for (let offset = 0; offset < TOTAL_BLOCKS; offset += CHUNK_SIZE) {
       const from = "0x" + (currentBlock - offset - CHUNK_SIZE).toString(16);
       const to = "0x" + (currentBlock - offset).toString(16);
       const logs = await scanSwapChunk(from, to);
       allLogs.push(...logs);
+      // 500ms delay between chunks to stay under rate limits
+      await sleep(500);
     }
 
     const buys: LargeBuy[] = [];
 
     for (const log of allLogs) {
-      // Uniswap V3 Swap event data layout:
-      // amount0 (int256) - bytes 0-31
-      // amount1 (int256) - bytes 32-63
-      const dataHex = log.data.slice(2); // remove 0x
+      const dataHex = log.data.slice(2);
       const amount0Raw = decodeInt256(dataHex.slice(0, 64));
 
       // A buy = amount0 negative (DRB flows out of pool to buyer)
@@ -83,7 +86,6 @@ export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[
       const blockDiff = currentBlock - blockNum;
       const timestamp = currentTimestamp - blockDiff * 2;
 
-      // Extract buyer from transaction (topic[2] is the recipient in Swap event)
       const buyer = log.topics.length > 2
         ? "0x" + log.topics[2].slice(26)
         : "unknown";
