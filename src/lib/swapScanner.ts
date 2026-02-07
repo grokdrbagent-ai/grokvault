@@ -49,9 +49,9 @@ export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[
     const currentBlock = parseInt(currentBlockHex, 16);
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    // Scan last ~24 hours (43,200 blocks) in 10K-block chunks
-    const CHUNK_SIZE = 10_000;
-    const TOTAL_BLOCKS = 43_200;
+    // Scan last ~7 days (302,400 blocks) in 50K-block chunks
+    const CHUNK_SIZE = 50_000;
+    const TOTAL_BLOCKS = 302_400;
     const allLogs: SwapLog[] = [];
 
     const chunkQueries: Array<() => Promise<SwapLog[]>> = [];
@@ -106,9 +106,9 @@ export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[
       });
     }
 
-    // Sort by block descending
+    // Sort by block descending, return top 10
     buys.sort((a, b) => b.blockNumber - a.blockNumber);
-    return buys;
+    return buys.slice(0, 10);
   } catch {
     return [];
   }
