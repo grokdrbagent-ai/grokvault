@@ -210,7 +210,7 @@ export async function fetchOtherTokens(ethPrice: number): Promise<OtherTokensDat
   const drbLower = DRB_CONTRACT.toLowerCase();
 
   for (const item of tokens) {
-    const addr = (item.token?.address ?? "").toLowerCase();
+    const addr = (item.token?.address_hash ?? "").toLowerCase();
     if (addr === wethLower || addr === drbLower) continue;
 
     const decimals = parseInt(item.token?.decimals ?? "18", 10);
