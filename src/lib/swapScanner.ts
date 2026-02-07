@@ -21,8 +21,9 @@ function decodeInt256(hex: string): bigint {
   return value;
 }
 
-// Blockscout v1 (Etherscan-compatible) API base
+// Blockscout API bases
 const BLOCKSCOUT_V1 = BLOCKSCOUT_API.replace("/api/v2", "/api");
+const BLOCKSCOUT_V2 = BLOCKSCOUT_API;
 
 interface EtherscanLog {
   blockNumber: string;
@@ -119,7 +120,25 @@ export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[
 
     const buys = [...r1, ...r2, ...r3];
     buys.sort((a, b) => b.blockNumber - a.blockNumber);
-    return buys.slice(0, 5);
+    const top = buys.slice(0, 5);
+
+    // Resolve real buyer addresses (tx sender) via Blockscout v2
+    await Promise.all(
+      top.map(async (buy) => {
+        try {
+          const res = await fetch(`${BLOCKSCOUT_V2}/transactions/${buy.hash}`);
+          if (res.ok) {
+            const tx = await res.json();
+            const from = tx.from?.hash;
+            if (from) buy.buyer = from;
+          }
+        } catch {
+          // Keep existing buyer from swap event topic
+        }
+      })
+    );
+
+    return top;
   } catch {
     return [];
   }
