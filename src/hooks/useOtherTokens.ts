@@ -22,13 +22,9 @@ export function useOtherTokens(ethPrice: number): OtherTokensData {
   }, [ethPrice]);
 
   useEffect(() => {
-    // Delay initial fetch by 5s to avoid competing with main data load
-    const initialDelay = setTimeout(poll, 5_000);
+    poll();
     const timer = setInterval(poll, 120_000);
-    return () => {
-      clearTimeout(initialDelay);
-      clearInterval(timer);
-    };
+    return () => clearInterval(timer);
   }, [poll]);
 
   return data;
