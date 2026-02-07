@@ -12,9 +12,9 @@ interface ActivityTickerProps {
 }
 
 const typeColors: Record<TickerEvent["type"], string> = {
-  fee: "text-[#39FF14]/50",
-  price: "text-[#00EAFF]/40",
-  milestone: "text-[#FFB800]/50",
+  fee: "text-[#39FF14]/60",
+  price: "text-[#00EAFF]/50",
+  milestone: "text-[#FFB800]/60",
 };
 
 export function ActivityTicker({
@@ -34,14 +34,14 @@ export function ActivityTicker({
     <span key={e.id} className={typeColors[e.type]}>
       {e.text}
       {i < events.length - 1 && (
-        <span className="text-white/10 mx-4">·</span>
+        <span className="text-white/20 mx-4">·</span>
       )}
     </span>
   ));
 
   return (
     <div className="ticker-container border-b border-white/[0.04] overflow-hidden">
-      <div className="ticker-scroll text-[10px] font-mono whitespace-nowrap py-2">
+      <div className="ticker-scroll text-[11px] font-mono whitespace-nowrap py-2">
         <span className="ticker-content">{content}</span>
         <span className="ticker-content ml-12" aria-hidden>{content}</span>
       </div>

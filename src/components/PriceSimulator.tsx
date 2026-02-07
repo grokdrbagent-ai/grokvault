@@ -321,25 +321,25 @@ export function PriceSimulator({
           className="group w-full text-left"
         >
           <div
-            className={`rounded-lg border px-4 py-3 transition-all duration-300 ${
+            className={`rounded-lg border px-5 py-4 transition-all duration-300 ${
               open
-                ? "border-[#39FF14]/20 bg-[#39FF14]/[0.03]"
-                : "border-white/[0.06] bg-white/[0.01] hover:border-[#39FF14]/15 hover:bg-[#39FF14]/[0.02]"
+                ? "border-[#39FF14]/25 bg-[#39FF14]/[0.04]"
+                : "border-[#39FF14]/10 bg-[#39FF14]/[0.02] hover:border-[#39FF14]/20 hover:bg-[#39FF14]/[0.04]"
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span
-                  className="text-base sm:text-lg font-mono text-white/30"
+                  className="text-base sm:text-lg font-mono text-[#39FF14]/40"
                   aria-hidden="true"
                 >
                   {open ? ">" : "~"}
                 </span>
                 <div>
-                  <span className="text-xs sm:text-sm font-display font-semibold text-white/70 group-hover:text-white/90 transition-colors">
+                  <span className="text-sm font-display font-semibold text-white/80 group-hover:text-white transition-colors">
                     what if $DRB does a...
                   </span>
-                  <span className="block text-[10px] font-mono text-white/30 mt-0.5">
+                  <span className="block text-[11px] font-mono text-white/40 mt-0.5">
                     scenario simulator &middot; MC: {formatMC(currentMC)}
                   </span>
                 </div>
@@ -347,7 +347,7 @@ export function PriceSimulator({
               <motion.span
                 animate={{ rotate: open ? 90 : 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-[10px] font-mono text-[#39FF14]/50"
+                className="text-[11px] font-mono text-[#39FF14]/60"
               >
                 {open ? "[-]" : "[+]"}
               </motion.span>
@@ -368,13 +368,13 @@ export function PriceSimulator({
                 {/* Slider */}
                 <div className="mb-5">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] text-white/40 font-mono">
+                    <span className="text-xs text-white/50 font-mono">
                       1x
                     </span>
-                    <span className="text-sm text-[#39FF14] font-mono font-bold tracking-wide">
+                    <span className="text-base text-[#39FF14] font-mono font-bold tracking-wide">
                       {fmtMult(simMultiplier)}
                     </span>
-                    <span className="text-[11px] text-white/40 font-mono">
+                    <span className="text-xs text-white/50 font-mono">
                       100x
                     </span>
                   </div>
@@ -414,12 +414,12 @@ export function PriceSimulator({
 
                 {/* Scenario results */}
                 <div className="space-y-3">
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-white/25 font-mono">
+                  <div className="text-[11px] uppercase tracking-[0.15em] text-white/40 font-mono">
                     scenario at {fmtMult(simMultiplier)}
                   </div>
 
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] text-white/35 font-mono">
+                    <span className="text-xs text-white/45 font-mono">
                       market cap
                     </span>
                     <span className="text-lg font-display font-bold text-[#39FF14]">
@@ -428,14 +428,14 @@ export function PriceSimulator({
                   </div>
 
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] text-white/35 font-mono">
+                    <span className="text-xs text-white/45 font-mono">
                       grok&apos;s wallet
                     </span>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-sm font-display font-bold text-white/80">
+                      <span className="text-sm font-display font-bold text-white/85">
                         {formatUSD(simGrokTotal)}
                       </span>
-                      <span className="text-[10px] text-white/25 font-mono">
+                      <span className="text-[11px] text-white/35 font-mono">
                         lvl {simGrokLevel.level}
                       </span>
                     </div>

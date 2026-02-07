@@ -9,10 +9,10 @@ interface StatusMessageProps {
 }
 
 const toneColors: Record<StatusTone, string> = {
-  positive: "text-[#39FF14]/50",
-  exciting: "text-[#FFB800]/60",
-  negative: "text-[#FF2D55]/40",
-  neutral: "text-white/25",
+  positive: "text-[#39FF14]/60",
+  exciting: "text-[#FFB800]/70",
+  negative: "text-[#FF2D55]/55",
+  neutral: "text-white/40",
 };
 
 export function StatusMessage({ message, tone }: StatusMessageProps) {
@@ -21,7 +21,7 @@ export function StatusMessage({ message, tone }: StatusMessageProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className={`text-[11px] font-mono mb-4 ${toneColors[tone]}`}
+      className={`text-xs font-mono mb-4 ${toneColors[tone]}`}
     >
       {message}
     </motion.div>

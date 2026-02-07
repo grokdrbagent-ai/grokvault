@@ -126,7 +126,7 @@ export default function Home() {
             <span className="font-display font-bold text-base tracking-tight">
               GROKVAULT
             </span>
-            <span className="text-[9px] text-white/15 font-mono uppercase tracking-widest hidden sm:inline">
+            <span className="text-[10px] text-white/30 font-mono uppercase tracking-widest hidden sm:inline">
               live
             </span>
           </div>
@@ -165,7 +165,7 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="text-[10px] uppercase tracking-[0.3em] text-white/20 mb-4 font-mono">
+          <div className="text-[11px] uppercase tracking-[0.3em] text-white/35 mb-4 font-mono">
             net worth
           </div>
 
@@ -201,13 +201,13 @@ export default function Home() {
               {data.change24hPercent >= 0 ? "\u25B2" : "\u25BC"}{" "}
               {data.change24hPercent >= 0 ? "+" : ""}
               {data.change24hPercent.toFixed(1)}%
-              <span className="text-white/20 ml-1">24h</span>
+              <span className="text-white/35 ml-1">24h</span>
             </span>
           </div>
 
           {/* Fee earnings */}
           {earningsUSD > 0 && (
-            <div className="text-[11px] text-[#39FF14]/40 font-mono">
+            <div className="text-[11px] text-[#39FF14]/55 font-mono">
               +{formatUSD(earningsUSD)} fee income (7d)
             </div>
           )}
@@ -252,11 +252,11 @@ export default function Home() {
           className="mb-12"
         >
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-mono">
+            <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/35 font-mono">
               $DRB / 7d
             </h2>
             {priceHistory.length > 1 && (
-              <span className="text-[10px] text-white/20 font-mono">
+              <span className="text-[11px] text-white/35 font-mono">
                 ${data.drbPrice.toFixed(8)}
               </span>
             )}
@@ -286,10 +286,10 @@ export default function Home() {
             className="mb-12"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] text-white/25 uppercase tracking-wider font-mono">
+              <span className="text-[11px] text-white/40 uppercase tracking-wider font-mono">
                 next: {nextLevel.name}
               </span>
-              <span className="text-[10px] text-white/25 font-mono">
+              <span className="text-[11px] text-white/40 font-mono">
                 {formatUSD(nextLevel.minValue)} &middot;{" "}
                 {progress.toFixed(1)}%
               </span>
@@ -312,14 +312,14 @@ export default function Home() {
           transition={{ delay: 0.5 }}
           className="mb-12"
         >
-          <h2 className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-mono mb-4">
+          <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/35 font-mono mb-4">
             achievements
           </h2>
           <Milestones milestones={milestones} />
         </motion.section>
 
         {/* Last updated */}
-        <div className="text-center text-[9px] text-white/10 font-mono tracking-wider">
+        <div className="text-center text-[11px] text-white/25 font-mono tracking-wider">
           {new Date(data.lastUpdated).toLocaleTimeString()} &middot; 30s
           balances &middot; 60s prices
         </div>

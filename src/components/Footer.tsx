@@ -11,7 +11,7 @@ export function Footer() {
           href={LINKS.buyDRB}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#39FF14]/50 hover:text-[#39FF14] transition-colors"
+          className="text-[#39FF14]/60 hover:text-[#39FF14] transition-colors"
         >
           buy $DRB
         </a>
@@ -19,7 +19,7 @@ export function Footer() {
           href={LINKS.community}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-white/20 hover:text-white/50 transition-colors"
+          className="text-white/35 hover:text-white/60 transition-colors"
         >
           community
         </a>
@@ -27,7 +27,7 @@ export function Footer() {
           href={LINKS.twitter}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-white/20 hover:text-white/50 transition-colors"
+          className="text-white/35 hover:text-white/60 transition-colors"
         >
           twitter
         </a>
@@ -35,12 +35,12 @@ export function Footer() {
           href={LINKS.grokWallet}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-white/20 hover:text-white/50 transition-colors"
+          className="text-white/35 hover:text-white/60 transition-colors"
         >
           view wallet
         </a>
       </div>
-      <div className="text-center mt-4 text-[10px] text-white/10 font-mono">
+      <div className="text-center mt-4 text-[11px] text-white/20 font-mono">
         built by draco.base.eth
       </div>
     </footer>

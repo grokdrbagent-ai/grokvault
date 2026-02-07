@@ -18,7 +18,7 @@ export function SparklineChart({
 }: SparklineChartProps) {
   if (data.length < 2) {
     return (
-      <div className={`text-white/15 text-xs text-center py-8 ${className}`}>
+      <div className={`text-white/30 text-xs text-center py-8 ${className}`}>
         loading chart data...
       </div>
     );
@@ -99,13 +99,13 @@ export function SparklineChart({
           <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite" />
         </circle>
 
-        <text x={padding.left + 4} y={height - 4} fill="rgba(255,255,255,0.15)" fontSize="8" fontFamily="monospace">
+        <text x={padding.left + 4} y={height - 4} fill="rgba(255,255,255,0.3)" fontSize="9" fontFamily="monospace">
           {formatDate(firstDate)}
         </text>
-        <text x={width / 2} y={height - 4} fill="rgba(255,255,255,0.15)" fontSize="8" fontFamily="monospace" textAnchor="middle">
+        <text x={width / 2} y={height - 4} fill="rgba(255,255,255,0.3)" fontSize="9" fontFamily="monospace" textAnchor="middle">
           {formatDate(midDate)}
         </text>
-        <text x={width - padding.right - 4} y={height - 4} fill="rgba(255,255,255,0.15)" fontSize="8" fontFamily="monospace" textAnchor="end">
+        <text x={width - padding.right - 4} y={height - 4} fill="rgba(255,255,255,0.3)" fontSize="9" fontFamily="monospace" textAnchor="end">
           {formatDate(lastDate)}
         </text>
       </svg>

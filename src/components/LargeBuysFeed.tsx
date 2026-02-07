@@ -28,11 +28,11 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
         <h2 className="text-xs uppercase tracking-[0.15em] text-white/50 font-display font-semibold">
           large buys
         </h2>
-        <span className="text-[10px] text-white/25 font-mono">
+        <span className="text-[11px] text-white/35 font-mono">
           $10K+ &middot; 7d
         </span>
         <span className="flex-1" />
-        <span className="text-[10px] text-white/25 font-mono">
+        <span className="text-[11px] text-white/35 font-mono">
           {buys.length} detected
         </span>
       </div>
@@ -45,10 +45,10 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
         </div>
       ) : buys.length === 0 ? (
         <div className="rounded-lg border border-white/[0.04] bg-white/[0.01] py-8 text-center">
-          <div className="text-xs text-white/25 font-mono">
+          <div className="text-xs text-white/35 font-mono">
             no large buys detected in the last 7d
           </div>
-          <div className="text-[10px] text-white/15 font-mono mt-1">
+          <div className="text-[11px] text-white/25 font-mono mt-1">
             watching for $10K+ swaps
           </div>
         </div>
@@ -91,7 +91,7 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
                   </span>
 
                   {/* DRB amount */}
-                  <span className="text-[11px] text-white/45 font-mono">
+                  <span className="text-[11px] text-white/50 font-mono">
                     {formatTokenAmount(buy.drbAmount)} DRB
                   </span>
 
@@ -103,15 +103,15 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
                     href={`https://basescan.org/address/${buy.buyer}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[10px] text-white/25 hover:text-white/50 font-mono transition-colors"
+                    className="text-[11px] text-white/35 hover:text-white/60 font-mono transition-colors"
                   >
                     {shortenAddress(buy.buyer)}
                   </a>
 
                   {/* Time ago */}
                   <span
-                    className={`text-[10px] font-mono min-w-[40px] text-right ${
-                      isRecent ? "text-[#39FF14]/40" : "text-white/25"
+                    className={`text-[11px] font-mono min-w-[40px] text-right ${
+                      isRecent ? "text-[#39FF14]/50" : "text-white/35"
                     }`}
                   >
                     {timeAgo(buy.timestamp)}
