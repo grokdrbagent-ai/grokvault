@@ -1,4 +1,4 @@
-import { DEXSCREENER_API, COINGECKO_API, GROK_WALLET, DRB_CONTRACT, WETH_CONTRACT } from "./constants";
+import { DEXSCREENER_API, COINGECKO_API, BLOCKSCOUT_API, GROK_WALLET, DRB_CONTRACT, WETH_CONTRACT } from "./constants";
 
 const BASE_RPC = "https://mainnet.base.org";
 
@@ -179,6 +179,59 @@ export async function fetchDRBPriceHistory(days = 7): Promise<PricePoint[]> {
   } catch {
     return [];
   }
+}
+
+// --- Other token balances via Blockscout ---
+
+export interface OtherTokensData {
+  othersValueUSD: number;
+  othersTokenCount: number;
+  ethBalance: number;
+  ethValueUSD: number;
+}
+
+export async function fetchOtherTokens(ethPrice: number): Promise<OtherTokensData> {
+  // Native ETH balance
+  const ethBalanceHex = (await rpcCall("eth_getBalance", [GROK_WALLET, "latest"])) as string;
+  const ethBalance = parseInt(ethBalanceHex, 16) / 1e18;
+  const ethValueUSD = ethBalance * ethPrice;
+
+  // All ERC-20 tokens via Blockscout
+  const res = await fetch(`${BLOCKSCOUT_API}/addresses/${GROK_WALLET}/token-balances`);
+  if (!res.ok) {
+    return { othersValueUSD: ethValueUSD, othersTokenCount: ethBalance > 0.001 ? 1 : 0, ethBalance, ethValueUSD };
+  }
+
+  const tokens = await res.json();
+  let othersValueUSD = 0;
+  let othersTokenCount = 0;
+
+  const wethLower = WETH_CONTRACT.toLowerCase();
+  const drbLower = DRB_CONTRACT.toLowerCase();
+
+  for (const item of tokens) {
+    const addr = (item.token?.address ?? "").toLowerCase();
+    if (addr === wethLower || addr === drbLower) continue;
+
+    const decimals = parseInt(item.token?.decimals ?? "18", 10);
+    if (isNaN(decimals)) continue;
+
+    const rawValue = item.value ?? "0";
+    const balance = Number(BigInt(rawValue)) / Math.pow(10, decimals);
+    const price = parseFloat(item.token?.exchange_rate ?? "0");
+    const usdValue = balance * price;
+
+    if (usdValue > 1) {
+      othersValueUSD += usdValue;
+      othersTokenCount++;
+    }
+  }
+
+  // Include native ETH in others
+  othersValueUSD += ethValueUSD;
+  if (ethBalance > 0.001) othersTokenCount++;
+
+  return { othersValueUSD, othersTokenCount, ethBalance, ethValueUSD };
 }
 
 // --- Combined fetch ---

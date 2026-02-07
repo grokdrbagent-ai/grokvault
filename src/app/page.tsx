@@ -7,6 +7,7 @@ import { usePersonalATH } from "@/hooks/usePersonalATH";
 import { useDynamicFavicon } from "@/hooks/useDynamicFavicon";
 import { useStatusMessage } from "@/hooks/useStatusMessage";
 import { useLargeBuys } from "@/hooks/useLargeBuys";
+import { useOtherTokens } from "@/hooks/useOtherTokens";
 import {
   getLevel,
   getNextLevel,
@@ -77,8 +78,11 @@ export default function Home() {
   const { data, loading, error, newFeeCount } = useWalletData();
   const priceHistory = usePriceHistory(7);
 
-  // New hooks
-  const { ath, isNewATH } = usePersonalATH(data?.totalValueUSD ?? null);
+  // Other tokens (Blockscout) — must be before athValue
+  const { othersValueUSD, othersTokenCount } = useOtherTokens(data?.ethPrice ?? 0);
+
+  const athValue = data ? data.totalValueUSD + othersValueUSD : null;
+  const { ath, isNewATH } = usePersonalATH(athValue);
   useDynamicFavicon(data?.change24hPercent ?? null);
 
   const earningsUSD = data
@@ -90,7 +94,7 @@ export default function Home() {
     : 0;
 
   const { message: statusMessage, tone: statusTone } = useStatusMessage(
-    data?.totalValueUSD ?? null,
+    athValue,
     data?.change24hPercent ?? null,
     earningsUSD
   );
@@ -103,10 +107,11 @@ export default function Home() {
   if (error && !data) return <ErrorScreen error={error} />;
   if (!data) return <LoadingScreen />;
 
-  const level = getLevel(data.totalValueUSD);
-  const nextLevel = getNextLevel(data.totalValueUSD);
-  const progress = getProgress(data.totalValueUSD);
-  const milestones = getMilestones(data.totalValueUSD);
+  const totalWithOthers = data.totalValueUSD + othersValueUSD;
+  const level = getLevel(totalWithOthers);
+  const nextLevel = getNextLevel(totalWithOthers);
+  const progress = getProgress(totalWithOthers);
+  const milestones = getMilestones(totalWithOthers);
   const dailyFeeRate = earningsUSD / 7;
 
   return (
@@ -127,7 +132,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <ShareButton
-              totalValue={data.totalValueUSD}
+              totalValue={totalWithOthers}
               level={level}
               dailyEarnings={earningsUSD}
             />
@@ -148,7 +153,7 @@ export default function Home() {
         recentFees={data.recentFees}
         drbPrice={data.drbPrice}
         ethPrice={data.ethPrice}
-        totalValueUSD={data.totalValueUSD}
+        totalValueUSD={totalWithOthers}
       />
 
       {/* Main */}
@@ -181,7 +186,7 @@ export default function Home() {
           {/* Total Value */}
           <div className="mb-3 flex items-baseline justify-center gap-3 flex-wrap">
             <CounterAnimation
-              value={data.totalValueUSD}
+              value={totalWithOthers}
               prefix="$"
               decimals={0}
               className="text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight value-glow"
@@ -211,7 +216,7 @@ export default function Home() {
           <PersonalATH ath={ath} isNewATH={isNewATH} />
 
           {/* Fun Comparison — F8 */}
-          <FunComparison currentValue={data.totalValueUSD} />
+          <FunComparison currentValue={totalWithOthers} />
         </motion.section>
 
         {/* Stat Cards */}
@@ -229,9 +234,9 @@ export default function Home() {
             delay={0.2}
           />
           <StatCard
-            label="7D fees"
-            value={formatUSD(earningsUSD)}
-            subValue={`${Math.floor(data.recentFees.length / 2)} claims`}
+            label="Others"
+            value={formatUSD(othersValueUSD)}
+            subValue={`${othersTokenCount} token${othersTokenCount !== 1 ? "s" : ""}`}
             delay={0.3}
           />
         </section>
@@ -265,8 +270,8 @@ export default function Home() {
         <PriceSimulator
           currentDRBPrice={data.drbPrice}
           drbBalance={data.drbBalance}
-          wethValueUSD={data.wethValueUSD}
-          currentTotalValue={data.totalValueUSD}
+          wethValueUSD={data.wethValueUSD + othersValueUSD}
+          currentTotalValue={totalWithOthers}
         />
 
         {/* Large Buys Feed — F9 */}
@@ -293,7 +298,7 @@ export default function Home() {
 
             {/* Milestone Countdown — F1 */}
             <MilestoneCountdown
-              currentValue={data.totalValueUSD}
+              currentValue={totalWithOthers}
               nextLevel={nextLevel}
               dailyFeeRate={dailyFeeRate}
             />

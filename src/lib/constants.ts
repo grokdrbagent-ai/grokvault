@@ -6,6 +6,7 @@ export const WETH_CONTRACT = "0x4200000000000000000000000000000000000006";
 // API endpoints
 export const DEXSCREENER_API = "https://api.dexscreener.com";
 export const COINGECKO_API = "https://api.coingecko.com/api/v3"; // fallback for historical data
+export const BLOCKSCOUT_API = "https://base.blockscout.com/api/v2";
 
 // Polling interval (ms)
 export const REFRESH_INTERVAL = 60_000;
