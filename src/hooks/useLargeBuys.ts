@@ -39,13 +39,9 @@ export function useLargeBuys(currentDRBPrice: number | null): UseLargeBuysReturn
   }, [currentDRBPrice]);
 
   useEffect(() => {
-    // Delay initial fetch by 10s to let main data + fee scan finish first
-    const initialDelay = setTimeout(poll, 10_000);
-    const timer = setInterval(poll, 180_000); // 3min — scan itself takes ~15s
-    return () => {
-      clearTimeout(initialDelay);
-      clearInterval(timer);
-    };
+    poll();
+    const timer = setInterval(poll, 120_000);
+    return () => clearInterval(timer);
   }, [poll]);
 
   return { buys, loading, newBuyCount };
