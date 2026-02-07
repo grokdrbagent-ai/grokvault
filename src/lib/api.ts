@@ -233,40 +233,37 @@ export async function fetchOtherTokens(ethPrice: number): Promise<OtherTokensDat
     }
   }
 
-  // Second pass: batch-fetch missing prices from DexScreener (max 30 per call)
+  // Second pass: batch-fetch missing prices from GeckoTerminal
   if (needPrice.length > 0) {
-    // Sort by balance desc, take top 30
     needPrice.sort((a, b) => b.balance - a.balance);
     const batch = needPrice.slice(0, 30);
-    const addresses = batch.map((t) => t.addr).join(",");
+    const addresses = batch.map((t) => t.addr).join("%2C");
     try {
-      const dexRes = await fetch(`https://api.dexscreener.com/tokens/v1/base/${addresses}`);
-      if (dexRes.ok) {
-        const pairs = await dexRes.json();
-        if (Array.isArray(pairs)) {
-          // Build price map: lowest-address base token → priceUsd
-          const priceMap = new Map<string, number>();
-          for (const pair of pairs) {
-            const baseAddr = (pair.baseToken?.address ?? "").toLowerCase();
-            const priceUsd = parseFloat(pair.priceUsd ?? "0");
-            if (priceUsd > 0 && !priceMap.has(baseAddr)) {
-              priceMap.set(baseAddr, priceUsd);
-            }
-          }
-          for (const t of batch) {
-            const dexPrice = priceMap.get(t.addr);
-            if (dexPrice) {
-              const usdValue = t.balance * dexPrice;
-              if (usdValue > 1) {
-                othersValueUSD += usdValue;
-                othersTokenCount++;
-              }
+      const geckoRes = await fetch(
+        `https://api.geckoterminal.com/api/v2/networks/base/tokens/multi/${addresses}`
+      );
+      if (geckoRes.ok) {
+        const geckoData = await geckoRes.json();
+        const geckoTokens = geckoData.data ?? [];
+        const priceMap = new Map<string, number>();
+        for (const t of geckoTokens) {
+          const addr = (t.attributes?.address ?? "").toLowerCase();
+          const price = parseFloat(t.attributes?.price_usd ?? "0");
+          if (price > 0) priceMap.set(addr, price);
+        }
+        for (const t of batch) {
+          const geckoPrice = priceMap.get(t.addr);
+          if (geckoPrice) {
+            const usdValue = t.balance * geckoPrice;
+            if (usdValue > 1) {
+              othersValueUSD += usdValue;
+              othersTokenCount++;
             }
           }
         }
       }
     } catch {
-      // DexScreener fallback failed, continue without
+      // GeckoTerminal fallback failed, continue without
     }
   }
 

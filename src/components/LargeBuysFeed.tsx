@@ -29,7 +29,7 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
           large buys
         </h2>
         <span className="text-[10px] text-white/25 font-mono">
-          $1K+ &middot; 7d
+          $10K+ &middot; 7d
         </span>
         <span className="flex-1" />
         <span className="text-[10px] text-white/25 font-mono">
@@ -49,7 +49,7 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
             no large buys detected in the last 7d
           </div>
           <div className="text-[10px] text-white/15 font-mono mt-1">
-            watching for $1K+ swaps
+            watching for $10K+ swaps
           </div>
         </div>
       ) : (

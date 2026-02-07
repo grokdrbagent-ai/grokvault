@@ -54,20 +54,12 @@ export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[
     const TOTAL_BLOCKS = 302_400;
     const allLogs: SwapLog[] = [];
 
-    const chunkQueries: Array<() => Promise<SwapLog[]>> = [];
+    // Run chunks sequentially to avoid RPC rate limits
     for (let offset = 0; offset < TOTAL_BLOCKS; offset += CHUNK_SIZE) {
       const from = "0x" + (currentBlock - offset - CHUNK_SIZE).toString(16);
       const to = "0x" + (currentBlock - offset).toString(16);
-      chunkQueries.push(() => scanSwapChunk(from, to));
-    }
-
-    // Run in batches of 2 to stay under rate limits
-    for (let i = 0; i < chunkQueries.length; i += 2) {
-      const batch = chunkQueries.slice(i, i + 2);
-      const results = await Promise.all(batch.map((fn) => fn()));
-      for (const logs of results) {
-        allLogs.push(...logs);
-      }
+      const logs = await scanSwapChunk(from, to);
+      allLogs.push(...logs);
     }
 
     const buys: LargeBuy[] = [];
