@@ -16,27 +16,29 @@ body {
   overflow-x: hidden;
 }
 
-/* Subtle dot grid */
+/* Subtle dot grid — neutral to avoid green overload */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(rgba(57, 255, 20, 0.035) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px);
   background-size: 20px 20px;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Ambient top glow */
+/* Ambient top glow — bicolor for depth */
 body::after {
   content: "";
   position: fixed;
   top: -20%;
   left: 50%;
   transform: translateX(-50%);
-  width: 80%;
+  width: 100%;
   height: 50%;
-  background: radial-gradient(ellipse, rgba(57, 255, 20, 0.035) 0%, transparent 70%);
+  background:
+    radial-gradient(ellipse at 35% 0%, rgba(57, 255, 20, 0.025) 0%, transparent 55%),
+    radial-gradient(ellipse at 65% 0%, rgba(0, 234, 255, 0.02) 0%, transparent 55%);
   pointer-events: none;
   z-index: 0;
 }
@@ -66,8 +68,8 @@ body::after {
 }
 
 @keyframes border-breathe {
-  0%, 100% { border-color: rgba(57, 255, 20, 0.06); }
-  50% { border-color: rgba(57, 255, 20, 0.12); }
+  0%, 100% { border-color: rgba(255, 255, 255, 0.06); }
+  50% { border-color: rgba(255, 255, 255, 0.1); }
 }
 
 @keyframes scan-line {
@@ -76,8 +78,8 @@ body::after {
 }
 
 @keyframes progress-glow {
-  0%, 100% { box-shadow: 0 0 8px var(--green-dim); }
-  50% { box-shadow: 0 0 20px var(--green-glow); }
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 184, 0, 0.15); }
+  50% { box-shadow: 0 0 20px rgba(255, 184, 0, 0.3); }
 }
 
 @keyframes float-up {
@@ -111,25 +113,25 @@ body::after {
 }
 
 .card-glow {
-  border: 1px solid rgba(57, 255, 20, 0.06);
-  background: rgba(255, 255, 255, 0.008);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
   animation: border-breathe 5s ease-in-out infinite;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 .card-glow:hover {
-  border-color: rgba(57, 255, 20, 0.18);
-  box-shadow: 0 0 30px rgba(57, 255, 20, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.02);
 }
 
 .font-display {
   font-family: var(--font-chakra), "Chakra Petch", sans-serif;
 }
 
-/* Achievement badges */
+/* Achievement badges — amber for accomplishments */
 .badge-achieved {
-  border-color: var(--green) !important;
-  background: rgba(57, 255, 20, 0.05);
-  box-shadow: 0 0 12px rgba(57, 255, 20, 0.08);
+  border-color: var(--amber) !important;
+  background: rgba(255, 184, 0, 0.05);
+  box-shadow: 0 0 12px rgba(255, 184, 0, 0.08);
 }
 .badge-locked {
   border-color: rgba(255, 255, 255, 0.04);
@@ -143,26 +145,26 @@ body::after {
   border: 1px solid rgba(255, 255, 255, 0.04);
 }
 .progress-fill {
-  background: linear-gradient(90deg, var(--green), var(--cyan));
+  background: linear-gradient(90deg, var(--amber), var(--green));
   animation: progress-glow 3s ease-in-out infinite;
 }
 
-/* Scan line */
+/* Scan line — neutral */
 .scan-overlay::before {
   content: "";
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.05), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
   animation: scan-line 8s linear infinite;
   pointer-events: none;
   z-index: 50;
 }
 
-/* Glow divider */
+/* Glow divider — neutral white for breathing room */
 .glow-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.12), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
 }
 
 /* ATH glow */
@@ -201,20 +203,20 @@ body::after {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green-dim), 0 0 20px rgba(57, 255, 20, 0.1);
+  background: var(--amber);
+  box-shadow: 0 0 8px rgba(255, 184, 0, 0.3), 0 0 20px rgba(255, 184, 0, 0.1);
   cursor: pointer;
   transition: box-shadow 0.2s;
 }
 .sim-slider::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 12px var(--green-glow), 0 0 30px rgba(57, 255, 20, 0.2);
+  box-shadow: 0 0 12px rgba(255, 184, 0, 0.5), 0 0 30px rgba(255, 184, 0, 0.2);
 }
 .sim-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green-dim);
+  background: var(--amber);
+  box-shadow: 0 0 8px rgba(255, 184, 0, 0.3);
   border: none;
   cursor: pointer;
 }
@@ -235,13 +237,13 @@ body::after {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(57, 255, 20, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(57, 255, 20, 0.25); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
 ::selection {
-  background: rgba(57, 255, 20, 0.2);
+  background: rgba(0, 234, 255, 0.2);
   color: #fff;
 }
 

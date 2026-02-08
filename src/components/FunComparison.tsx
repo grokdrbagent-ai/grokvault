@@ -24,7 +24,7 @@ export function FunComparison({ currentValue }: FunComparisonProps) {
 
   return (
     <div className="mt-6 flex items-center justify-center gap-3">
-      <span className="hidden sm:block w-8 h-px bg-gradient-to-r from-transparent to-[#39FF14]/20" />
+      <span className="hidden sm:block w-8 h-px bg-gradient-to-r from-transparent to-[#00EAFF]/20" />
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -33,13 +33,13 @@ export function FunComparison({ currentValue }: FunComparisonProps) {
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="text-[13px] sm:text-sm text-[#39FF14]/60 font-mono tracking-wide"
+          className="text-[13px] sm:text-sm text-[#00EAFF]/50 font-mono tracking-wide"
         >
           {text}
         </motion.div>
       </AnimatePresence>
 
-      <span className="hidden sm:block w-8 h-px bg-gradient-to-l from-transparent to-[#39FF14]/20" />
+      <span className="hidden sm:block w-8 h-px bg-gradient-to-l from-transparent to-[#00EAFF]/20" />
     </div>
   );
 }

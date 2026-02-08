@@ -20,11 +20,11 @@ export function Milestones({ milestones }: MilestonesProps) {
             m.achieved ? "badge-achieved" : "badge-locked"
           }`}
         >
-          <span className={m.achieved ? "text-[#39FF14]" : "text-white/40"}>
+          <span className={m.achieved ? "text-[#FFB800]" : "text-white/40"}>
             {m.label}
           </span>
           {m.achieved && (
-            <span className="ml-1.5 text-[#39FF14]/60">&check;</span>
+            <span className="ml-1.5 text-[#FFB800]/60">&check;</span>
           )}
         </motion.div>
       ))}

@@ -140,7 +140,7 @@ export default function Home() {
               href={LINKS.grokWallet}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline text-[10px] text-white/20 hover:text-white/40 transition-colors font-mono"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded border border-white/10 px-3 py-1.5 text-[11px] font-mono text-white/50 transition-all hover:text-white/80 hover:border-white/20 hover:bg-white/[0.03]"
             >
               basescan
             </a>
@@ -173,12 +173,12 @@ export default function Home() {
           <StatusMessage message={statusMessage} tone={statusTone} />
 
           {/* Level Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#39FF14]/15 bg-[#39FF14]/[0.03] px-4 py-1.5 mb-5">
-            <span className="text-[10px] font-mono text-[#39FF14]/70 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#FFB800]/20 bg-[#FFB800]/[0.04] px-4 py-1.5 mb-5">
+            <span className="text-[10px] font-mono text-[#FFB800]/70 uppercase tracking-wider">
               lvl {level.level}
             </span>
-            <span className="w-px h-3 bg-[#39FF14]/20" />
-            <span className="text-[10px] font-display font-semibold text-[#39FF14]">
+            <span className="w-px h-3 bg-[#FFB800]/20" />
+            <span className="text-[10px] font-display font-semibold text-[#FFB800]">
               {level.name}
             </span>
           </div>
@@ -226,18 +226,21 @@ export default function Home() {
             value={`${data.wethBalance.toFixed(2)} WETH`}
             subValue={formatUSD(data.wethValueUSD)}
             delay={0.1}
+            accent="cyan"
           />
           <StatCard
             label="$DRB"
             value={`${formatTokenAmount(data.drbBalance)} DRB`}
             subValue={formatUSD(data.drbValueUSD)}
             delay={0.2}
+            accent="green"
           />
           <StatCard
             label="Others"
             value={formatUSD(othersValueUSD)}
             subValue={`${othersTokenCount} token${othersTokenCount !== 1 ? "s" : ""}`}
             delay={0.3}
+            accent="amber"
           />
         </section>
 
@@ -252,11 +255,11 @@ export default function Home() {
           className="mb-12"
         >
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/35 font-mono">
+            <h2 className="text-[11px] uppercase tracking-[0.2em] text-[#00EAFF]/40 font-mono">
               $DRB / 7d
             </h2>
             {priceHistory.length > 1 && (
-              <span className="text-[11px] text-white/35 font-mono">
+              <span className="text-[11px] text-[#00EAFF]/40 font-mono">
                 ${data.drbPrice.toFixed(8)}
               </span>
             )}
@@ -286,10 +289,10 @@ export default function Home() {
             className="mb-12"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] text-white/40 uppercase tracking-wider font-mono">
+              <span className="text-[11px] text-[#FFB800]/50 uppercase tracking-wider font-mono">
                 next: {nextLevel.name}
               </span>
-              <span className="text-[11px] text-white/40 font-mono">
+              <span className="text-[11px] text-[#FFB800]/50 font-mono">
                 {formatUSD(nextLevel.minValue)} &middot;{" "}
                 {progress.toFixed(1)}%
               </span>
@@ -312,7 +315,7 @@ export default function Home() {
           transition={{ delay: 0.5 }}
           className="mb-12"
         >
-          <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/35 font-mono mb-4">
+          <h2 className="text-[11px] uppercase tracking-[0.2em] text-[#FFB800]/40 font-mono mb-4">
             achievements
           </h2>
           <Milestones milestones={milestones} />

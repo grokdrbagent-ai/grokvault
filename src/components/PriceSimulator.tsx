@@ -321,25 +321,30 @@ export function PriceSimulator({
           className="group w-full text-left"
         >
           <div
-            className={`rounded-lg border px-5 py-4 transition-all duration-300 ${
+            className={`relative rounded-xl border px-6 py-5 transition-all duration-300 overflow-hidden ${
               open
-                ? "border-[#39FF14]/25 bg-[#39FF14]/[0.04]"
-                : "border-[#39FF14]/10 bg-[#39FF14]/[0.02] hover:border-[#39FF14]/20 hover:bg-[#39FF14]/[0.04]"
+                ? "border-[#FFB800]/30 bg-[#FFB800]/[0.06]"
+                : "border-[#FFB800]/15 bg-[#FFB800]/[0.03] hover:border-[#FFB800]/25 hover:bg-[#FFB800]/[0.05]"
             }`}
+            style={{
+              boxShadow: open
+                ? "0 0 30px rgba(255, 184, 0, 0.06), inset 0 1px 0 rgba(255, 184, 0, 0.08)"
+                : "0 0 20px rgba(255, 184, 0, 0.03), inset 0 1px 0 rgba(255, 184, 0, 0.04)",
+            }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span
-                  className="text-base sm:text-lg font-mono text-[#39FF14]/40"
+                  className="text-lg sm:text-xl font-mono text-[#FFB800]/50"
                   aria-hidden="true"
                 >
                   {open ? ">" : "~"}
                 </span>
                 <div>
-                  <span className="text-sm font-display font-semibold text-white/80 group-hover:text-white transition-colors">
+                  <span className="text-sm sm:text-base font-display font-bold text-white/90 group-hover:text-white transition-colors">
                     what if $DRB does a...
                   </span>
-                  <span className="block text-[11px] font-mono text-white/40 mt-0.5">
+                  <span className="block text-[11px] font-mono text-[#FFB800]/40 mt-0.5">
                     scenario simulator &middot; MC: {formatMC(currentMC)}
                   </span>
                 </div>
@@ -347,7 +352,7 @@ export function PriceSimulator({
               <motion.span
                 animate={{ rotate: open ? 90 : 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-[11px] font-mono text-[#39FF14]/60"
+                className="text-xs font-mono text-[#FFB800]/60"
               >
                 {open ? "[-]" : "[+]"}
               </motion.span>
@@ -371,7 +376,7 @@ export function PriceSimulator({
                     <span className="text-xs text-white/50 font-mono">
                       1x
                     </span>
-                    <span className="text-base text-[#39FF14] font-mono font-bold tracking-wide">
+                    <span className="text-base text-[#FFB800] font-mono font-bold tracking-wide">
                       {fmtMult(simMultiplier)}
                     </span>
                     <span className="text-xs text-white/50 font-mono">
@@ -402,8 +407,8 @@ export function PriceSimulator({
                         }
                         className={`text-[11px] font-mono px-3 py-1.5 rounded border transition-all duration-200 ${
                           isActive
-                            ? "border-[#39FF14]/40 text-[#39FF14] bg-[#39FF14]/[0.06]"
-                            : "border-white/10 text-white/40 hover:text-[#39FF14] hover:border-[#39FF14]/40 hover:bg-[#39FF14]/[0.04]"
+                            ? "border-[#FFB800]/40 text-[#FFB800] bg-[#FFB800]/[0.06]"
+                            : "border-white/10 text-white/40 hover:text-[#FFB800] hover:border-[#FFB800]/40 hover:bg-[#FFB800]/[0.04]"
                         }`}
                       >
                         {mult}x
@@ -414,7 +419,7 @@ export function PriceSimulator({
 
                 {/* Scenario results */}
                 <div className="space-y-3">
-                  <div className="text-[11px] uppercase tracking-[0.15em] text-white/40 font-mono">
+                  <div className="text-[11px] uppercase tracking-[0.15em] text-[#FFB800]/40 font-mono">
                     scenario at {fmtMult(simMultiplier)}
                   </div>
 
@@ -422,7 +427,7 @@ export function PriceSimulator({
                     <span className="text-xs text-white/45 font-mono">
                       market cap
                     </span>
-                    <span className="text-lg font-display font-bold text-[#39FF14]">
+                    <span className="text-lg font-display font-bold text-[#FFB800]">
                       {formatMC(simMC)}
                     </span>
                   </div>
@@ -447,7 +452,7 @@ export function PriceSimulator({
 
                 {/* Your Holdings */}
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-white/25 font-mono mb-3">
+                  <div className="text-[10px] uppercase tracking-[0.15em] text-[#FFB800]/30 font-mono mb-3">
                     your holdings
                   </div>
                   <div className="flex items-center gap-2 mb-4">
@@ -459,7 +464,7 @@ export function PriceSimulator({
                       onChange={(e) =>
                         setUserDRB(e.target.value.replace(/[^0-9.]/g, ""))
                       }
-                      className="flex-1 bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-white/80 placeholder:text-white/20 focus:border-[#39FF14]/30 focus:outline-none transition-colors"
+                      className="flex-1 bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-white/80 placeholder:text-white/20 focus:border-[#FFB800]/30 focus:outline-none transition-colors"
                     />
                     <span className="text-xs text-white/30 font-mono">DRB</span>
                   </div>
@@ -504,7 +509,7 @@ export function PriceSimulator({
                     href={`https://x.com/intent/tweet?text=${tweetText}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] font-mono text-white/30 hover:text-[#39FF14]/70 transition-colors uppercase tracking-wider py-2"
+                    className="text-[11px] font-mono text-white/30 hover:text-[#FFB800]/70 transition-colors uppercase tracking-wider py-2"
                   >
                     [ share on X ]
                   </a>
@@ -555,7 +560,7 @@ export function PriceSimulator({
               <div className="flex items-center justify-center gap-4 mt-4">
                 <button
                   onClick={handleDownloadFromPreview}
-                  className="text-[11px] font-mono text-white/40 hover:text-[#39FF14]/70 border border-white/10 hover:border-[#39FF14]/30 rounded px-4 py-2 transition-all uppercase tracking-wider"
+                  className="text-[11px] font-mono text-white/40 hover:text-[#FFB800]/70 border border-white/10 hover:border-[#FFB800]/30 rounded px-4 py-2 transition-all uppercase tracking-wider"
                 >
                   [ download ]
                 </button>
@@ -564,7 +569,7 @@ export function PriceSimulator({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleDownloadFromPreview}
-                  className="text-[11px] font-mono text-white/40 hover:text-[#39FF14]/70 border border-white/10 hover:border-[#39FF14]/30 rounded px-4 py-2 transition-all uppercase tracking-wider"
+                  className="text-[11px] font-mono text-white/40 hover:text-[#FFB800]/70 border border-white/10 hover:border-[#FFB800]/30 rounded px-4 py-2 transition-all uppercase tracking-wider"
                 >
                   [ share on X ]
                 </a>

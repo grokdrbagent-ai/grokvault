@@ -8,9 +8,18 @@ interface StatCardProps {
   subValue: string;
   icon?: string;
   delay?: number;
+  accent?: "green" | "cyan" | "amber";
 }
 
-export function StatCard({ label, value, subValue, delay = 0 }: StatCardProps) {
+const accentColors = {
+  green: "text-[#39FF14]/50",
+  cyan: "text-[#00EAFF]/50",
+  amber: "text-[#FFB800]/50",
+};
+
+export function StatCard({ label, value, subValue, delay = 0, accent }: StatCardProps) {
+  const labelColor = accent ? accentColors[accent] : "text-white/40";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -18,7 +27,7 @@ export function StatCard({ label, value, subValue, delay = 0 }: StatCardProps) {
       transition={{ duration: 0.5, delay }}
       className="card-glow rounded-lg px-5 py-4"
     >
-      <div className="text-[11px] uppercase tracking-[0.2em] text-white/40 mb-3 font-display">
+      <div className={`text-[11px] uppercase tracking-[0.2em] mb-3 font-display ${labelColor}`}>
         {label}
       </div>
       <div className="text-lg font-semibold font-display tracking-tight text-white">

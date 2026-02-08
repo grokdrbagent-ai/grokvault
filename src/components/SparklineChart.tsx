@@ -42,7 +42,7 @@ export function SparklineChart({
   const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
   const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding.top + chartH} L ${points[0].x} ${padding.top + chartH} Z`;
 
-  const color = "#39FF14";
+  const color = "#00EAFF";
 
   const firstDate = new Date(data[0].timestamp);
   const lastDate = new Date(data[data.length - 1].timestamp);
