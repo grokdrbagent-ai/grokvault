@@ -10,14 +10,15 @@ import {
   PriceData,
 } from "@/lib/api";
 
-const RPC_INTERVAL = 30_000; // 30s for balances + fees
+const BALANCE_INTERVAL = 30_000; // 30s for balances
 const PRICE_INTERVAL = 60_000; // 60s for DexScreener prices
+const FEE_INTERVAL = 60_000; // 60s for fee scanning
 
 interface UseWalletDataReturn {
   data: WalletData | null;
   loading: boolean;
   error: string | null;
-  newFeeCount: number; // increments when new fees detected
+  newFeeCount: number;
 }
 
 export function useWalletData(): UseWalletDataReturn {
@@ -32,26 +33,9 @@ export function useWalletData(): UseWalletDataReturn {
   });
   const prevFeeHashesRef = useRef<Set<string>>(new Set());
 
-  // Fetch prices (slower interval)
-  const fetchPriceData = useCallback(async () => {
-    try {
-      const { ethPrice, drbPrice } = await fetchPrices();
-      pricesRef.current = { eth: ethPrice, drb: drbPrice };
-    } catch {
-      // Keep stale prices on error
-    }
-  }, []);
-
-  // Fetch balances + fees (faster interval), combine with cached prices
-  const fetchBalances = useCallback(async () => {
-    try {
-      setError(null);
-      const [wethBalance, drbBalance, recentFees] = await Promise.all([
-        fetchWETHBalance(),
-        fetchDRBBalance(),
-        fetchRecentFees(),
-      ]);
-
+  // Rebuild data object from prices + balances + existing fees
+  const buildData = useCallback(
+    (wethBalance: number, drbBalance: number, recentFees: WalletData["recentFees"]) => {
       const ethPrice = pricesRef.current.eth.usd;
       const drbPrice = pricesRef.current.drb.usd;
       const wethValueUSD = wethBalance * ethPrice;
@@ -64,17 +48,7 @@ export function useWalletData(): UseWalletDataReturn {
         pricesRef.current.eth.usd_24h_change * ethWeight +
         pricesRef.current.drb.usd_24h_change * drbWeight;
 
-      // Detect new fees
-      const currentHashes = new Set(recentFees.map((f) => f.hash));
-      if (prevFeeHashesRef.current.size > 0) {
-        const hasNewFees = recentFees.some((f) => !prevFeeHashesRef.current.has(f.hash));
-        if (hasNewFees) {
-          setNewFeeCount((c) => c + 1);
-        }
-      }
-      prevFeeHashesRef.current = currentHashes;
-
-      setData({
+      return {
         wethBalance,
         drbBalance,
         ethPrice,
@@ -85,30 +59,72 @@ export function useWalletData(): UseWalletDataReturn {
         change24hPercent,
         recentFees,
         lastUpdated: Date.now(),
+      };
+    },
+    [],
+  );
+
+  // Fetch fees (background, non-blocking)
+  const fetchFees = useCallback(async () => {
+    try {
+      const recentFees = await fetchRecentFees();
+
+      // Detect new fees
+      const currentHashes = new Set(recentFees.map((f) => f.hash));
+      if (prevFeeHashesRef.current.size > 0) {
+        const hasNewFees = recentFees.some((f) => !prevFeeHashesRef.current.has(f.hash));
+        if (hasNewFees) setNewFeeCount((c) => c + 1);
+      }
+      prevFeeHashesRef.current = currentHashes;
+
+      // Merge fees into existing data
+      setData((prev) => {
+        if (!prev) return prev;
+        return { ...prev, recentFees, lastUpdated: Date.now() };
       });
+    } catch {
+      // Fees are non-critical, silently ignore
+    }
+  }, []);
+
+  // Fetch prices + balances together (critical path)
+  const fetchCoreData = useCallback(async () => {
+    try {
+      setError(null);
+
+      // All critical fetches in parallel
+      const [prices, wethBalance, drbBalance] = await Promise.all([
+        fetchPrices(),
+        fetchWETHBalance(),
+        fetchDRBBalance(),
+      ]);
+
+      pricesRef.current = { eth: prices.ethPrice, drb: prices.drbPrice };
+
+      setData((prev) =>
+        buildData(wethBalance, drbBalance, prev?.recentFees ?? []),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch data");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [buildData]);
 
   useEffect(() => {
-    // Initial load: fetch prices first, then balances
-    const init = async () => {
-      await fetchPriceData();
-      await fetchBalances();
-    };
-    init();
+    // Phase 1: prices + balances in parallel (~2-3s) → show dashboard
+    // Phase 2: fees in background (~5-10s) → update when ready
+    fetchCoreData();
+    fetchFees();
 
-    const rpcTimer = setInterval(fetchBalances, RPC_INTERVAL);
-    const priceTimer = setInterval(fetchPriceData, PRICE_INTERVAL);
+    const balanceTimer = setInterval(fetchCoreData, BALANCE_INTERVAL);
+    const feeTimer = setInterval(fetchFees, FEE_INTERVAL);
 
     return () => {
-      clearInterval(rpcTimer);
-      clearInterval(priceTimer);
+      clearInterval(balanceTimer);
+      clearInterval(feeTimer);
     };
-  }, [fetchPriceData, fetchBalances]);
+  }, [fetchCoreData, fetchFees]);
 
   return { data, loading, error, newFeeCount };
 }
