@@ -119,10 +119,10 @@ export function useWalletData(): UseWalletDataReturn {
       setData((prev) =>
         buildData(wethBalance, drbBalance, prev?.recentFees ?? []),
       );
-    } catch (err) {
+    } catch {
       onFailure("core");
       if (mountedRef.current) {
-        setError(err instanceof Error ? err.message : "Failed to fetch data");
+        setError("Unable to connect — retrying automatically");
       }
     } finally {
       if (mountedRef.current) setLoading(false);

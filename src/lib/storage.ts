@@ -69,7 +69,15 @@ export function getLastVisit(): VisitData | null {
   const raw = getItem("last_visit");
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as VisitData;
+    const parsed = JSON.parse(raw);
+    if (
+      typeof parsed.timestamp !== "number" ||
+      typeof parsed.totalValueUSD !== "number" ||
+      typeof parsed.fees7d !== "number"
+    ) {
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }

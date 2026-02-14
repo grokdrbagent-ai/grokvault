@@ -9,6 +9,8 @@ interface LargeBuysFeedProps {
   loading: boolean;
 }
 
+const ETH_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
+
 function shortenAddress(addr: string): string {
   if (addr.length < 10) return addr;
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -99,14 +101,20 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
                   <span className="flex-1" />
 
                   {/* Address — clickable to Basescan */}
-                  <a
-                    href={`https://basescan.org/address/${buy.buyer}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-white/55 hover:text-white/70 font-mono transition-colors"
-                  >
-                    {shortenAddress(buy.buyer)}
-                  </a>
+                  {ETH_ADDRESS_RE.test(buy.buyer) ? (
+                    <a
+                      href={`https://basescan.org/address/${buy.buyer}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-white/55 hover:text-white/70 font-mono transition-colors"
+                    >
+                      {shortenAddress(buy.buyer)}
+                    </a>
+                  ) : (
+                    <span className="text-xs text-white/55 font-mono">
+                      {shortenAddress(buy.buyer)}
+                    </span>
+                  )}
 
                   {/* Time ago */}
                   <span

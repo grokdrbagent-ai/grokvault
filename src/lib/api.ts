@@ -1,22 +1,42 @@
 import { DEXSCREENER_API, COINGECKO_API, BLOCKSCOUT_API, GROK_WALLET, DRB_CONTRACT, WETH_CONTRACT, BLOCKS_7_DAYS } from "./constants";
 
-const BASE_RPC = "https://mainnet.base.org";
+const RPC_ENDPOINTS = [
+  "https://mainnet.base.org",
+  "https://base.llamarpc.com",
+];
 
 // --- Base RPC helpers ---
 
 export async function rpcCall(method: string, params: unknown[]): Promise<unknown> {
-  const res = await fetch(BASE_RPC, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 }),
-  });
-  if (!res.ok) throw new Error(`RPC HTTP error: ${res.status}`);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message || "RPC error");
-  if (data.result === undefined || data.result === null) {
-    throw new Error("RPC returned no result");
+  let lastError: Error | null = null;
+
+  for (const rpc of RPC_ENDPOINTS) {
+    try {
+      const res = await fetch(rpc, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 }),
+      });
+      if (!res.ok) {
+        lastError = new Error(`RPC HTTP error: ${res.status}`);
+        continue;
+      }
+      const data = await res.json();
+      if (data.error) {
+        lastError = new Error(data.error.message || "RPC error");
+        continue;
+      }
+      if (data.result === undefined || data.result === null) {
+        lastError = new Error("RPC returned no result");
+        continue;
+      }
+      return data.result;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error("RPC request failed");
+    }
   }
-  return data.result;
+
+  throw lastError ?? new Error("All RPC endpoints failed");
 }
 
 // --- Balances via RPC ---
@@ -246,7 +266,12 @@ export async function fetchOtherTokens(ethPrice: number): Promise<OtherTokensDat
     if (isNaN(decimals) || decimals < 0 || decimals > 77) continue;
 
     const rawValue = item.value ?? "0";
-    const balance = Number(BigInt(rawValue)) / Math.pow(10, decimals);
+    let balance: number;
+    try {
+      balance = Number(BigInt(rawValue)) / Math.pow(10, decimals);
+    } catch {
+      continue; // skip token with malformed value
+    }
     const rate = item.token?.exchange_rate;
     const price = rate ? parseFloat(rate) : 0;
     const usdValue = balance * price;
