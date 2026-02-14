@@ -23,11 +23,21 @@ export const metadata: Metadata = {
     title: "GrokVault — Grok's AI Wallet Tracker",
     description: "Track Grok AI's crypto wallet in real-time with gamified levels and milestones.",
     type: "website",
+    url: "https://grokvault.xyz",
+    images: [
+      {
+        url: "https://grokvault.xyz/thumb.png",
+        width: 1200,
+        height: 628,
+        alt: "GrokVault — Grok's AI Wallet Tracker Dashboard",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "GrokVault — Grok's AI Wallet Tracker | $DRB",
     description: "Track Grok AI's crypto wallet in real-time with gamified levels and milestones.",
+    images: ["https://grokvault.xyz/thumb.png"],
   },
 };
 
