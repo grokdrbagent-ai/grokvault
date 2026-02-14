@@ -1,5 +1,6 @@
 "use client";
 
+import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { useWalletData } from "@/hooks/useWalletData";
 import { usePriceHistory } from "@/hooks/usePriceHistory";
@@ -29,23 +30,23 @@ import { StatusMessage } from "@/components/StatusMessage";
 import { MilestoneCountdown } from "@/components/MilestoneCountdown";
 import { FunComparison } from "@/components/FunComparison";
 import { ActivityTicker } from "@/components/ActivityTicker";
-import { PriceSimulator } from "@/components/PriceSimulator";
 import { LargeBuysFeed } from "@/components/LargeBuysFeed";
 import { LINKS } from "@/lib/constants";
+
+const PriceSimulator = lazy(() =>
+  import("@/components/PriceSimulator").then((m) => ({ default: m.PriceSimulator }))
+);
 
 function LoadingScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
         <div className="live-dot mx-auto mb-4 w-3 h-3" />
-        <div className="text-xs text-white/30 font-mono tracking-widest uppercase">
+        <div className="text-xs text-white/55 font-mono tracking-widest uppercase">
           initializing grokvault...
         </div>
         <div className="mt-4 w-48 h-0.5 progress-track rounded-full overflow-hidden mx-auto">
-          <div
-            className="h-full progress-fill rounded-full animate-pulse"
-            style={{ width: "60%" }}
-          />
+          <div className="h-full progress-fill rounded-full loading-bar" />
         </div>
       </div>
     </div>
@@ -57,15 +58,15 @@ function ErrorScreen({ error }: { error: string }) {
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
         <div className="w-3 h-3 rounded-full bg-[#FF2D55] mx-auto mb-4 animate-pulse" />
-        <div className="text-xs text-white/30 font-mono tracking-widest uppercase mb-2">
+        <div className="text-xs text-white/55 font-mono tracking-widest uppercase mb-2">
           connection lost
         </div>
-        <div className="text-[10px] text-[#FF2D55]/60 font-mono mb-4">
+        <div className="text-xs text-[#FF2D55]/70 font-mono mb-4">
           {error}
         </div>
         <button
           onClick={() => window.location.reload()}
-          className="text-[10px] text-[#39FF14]/60 hover:text-[#39FF14] font-mono transition-colors uppercase tracking-wider"
+          className="text-xs text-[#39FF14]/60 hover:text-[#39FF14] font-mono transition-colors uppercase tracking-wider"
         >
           [ retry ]
         </button>
@@ -118,15 +119,24 @@ export default function Home() {
     <div className="relative min-h-screen text-white z-10">
       <CoinRain trigger={newFeeCount} />
 
+      {/* Connection warning */}
+      {error && data && (
+        <div className="bg-[#FF2D55]/10 border-b border-[#FF2D55]/20 py-1.5 px-4 text-center">
+          <span className="text-xs font-mono text-[#FF2D55]/70">
+            connection issue &mdash; showing cached data
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-white/[0.04]">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="live-dot" />
-            <span className="font-display font-bold text-base tracking-tight">
+            <h1 className="font-display font-bold text-base tracking-tight">
               GROKVAULT
-            </span>
-            <span className="text-[10px] text-white/30 font-mono uppercase tracking-widest hidden sm:inline">
+            </h1>
+            <span className="text-xs text-white/55 font-mono uppercase tracking-widest hidden sm:inline">
               live
             </span>
           </div>
@@ -140,7 +150,7 @@ export default function Home() {
               href={LINKS.grokWallet}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 rounded border border-white/10 px-3 py-1.5 text-[11px] font-mono text-white/50 transition-all hover:text-white/80 hover:border-white/20 hover:bg-white/[0.03]"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded border border-white/10 px-3 py-1.5 text-xs font-mono text-white/55 transition-all hover:text-white/80 hover:border-white/20 hover:bg-white/[0.03]"
             >
               basescan
             </a>
@@ -165,7 +175,7 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="text-[11px] uppercase tracking-[0.3em] text-white/35 mb-4 font-mono">
+          <div className="text-xs uppercase tracking-[0.3em] text-white/55 mb-4 font-mono">
             net worth
           </div>
 
@@ -174,11 +184,11 @@ export default function Home() {
 
           {/* Level Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-[#FFB800]/20 bg-[#FFB800]/[0.04] px-4 py-1.5 mb-5">
-            <span className="text-[10px] font-mono text-[#FFB800]/70 uppercase tracking-wider">
+            <span className="text-xs font-mono text-[#FFB800]/70 uppercase tracking-wider">
               lvl {level.level}
             </span>
             <span className="w-px h-3 bg-[#FFB800]/20" />
-            <span className="text-[10px] font-display font-semibold text-[#FFB800]">
+            <span className="text-xs font-display font-semibold text-[#FFB800]">
               {level.name}
             </span>
           </div>
@@ -201,13 +211,13 @@ export default function Home() {
               {data.change24hPercent >= 0 ? "\u25B2" : "\u25BC"}{" "}
               {data.change24hPercent >= 0 ? "+" : ""}
               {data.change24hPercent.toFixed(1)}%
-              <span className="text-white/35 ml-1">24h</span>
+              <span className="text-white/55 ml-1">24h</span>
             </span>
           </div>
 
           {/* Fee earnings */}
           {earningsUSD > 0 && (
-            <div className="text-[11px] text-[#39FF14]/55 font-mono">
+            <div className="text-xs text-[#39FF14]/60 font-mono">
               +{formatUSD(earningsUSD)} fee income (7d)
             </div>
           )}
@@ -255,11 +265,11 @@ export default function Home() {
           className="mb-12"
         >
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[11px] uppercase tracking-[0.2em] text-[#00EAFF]/40 font-mono">
+            <h2 className="text-xs uppercase tracking-[0.2em] text-[#00EAFF]/55 font-mono">
               $DRB / 7d
             </h2>
             {priceHistory.length > 1 && (
-              <span className="text-[11px] text-[#00EAFF]/40 font-mono">
+              <span className="text-xs text-[#00EAFF]/55 font-mono">
                 ${data.drbPrice.toFixed(8)}
               </span>
             )}
@@ -270,12 +280,14 @@ export default function Home() {
         </motion.section>
 
         {/* What If Simulator — F6 */}
-        <PriceSimulator
-          currentDRBPrice={data.drbPrice}
-          drbBalance={data.drbBalance}
-          wethValueUSD={data.wethValueUSD + othersValueUSD}
-          currentTotalValue={totalWithOthers}
-        />
+        <Suspense fallback={null}>
+          <PriceSimulator
+            currentDRBPrice={data.drbPrice}
+            drbBalance={data.drbBalance}
+            wethValueUSD={data.wethValueUSD + othersValueUSD}
+            currentTotalValue={totalWithOthers}
+          />
+        </Suspense>
 
         {/* Large Buys Feed — F9 */}
         <LargeBuysFeed buys={largeBuys} loading={largeBuysLoading} />
@@ -289,10 +301,10 @@ export default function Home() {
             className="mb-12"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] text-[#FFB800]/50 uppercase tracking-wider font-mono">
+              <span className="text-xs text-[#FFB800]/60 uppercase tracking-wider font-mono">
                 next: {nextLevel.name}
               </span>
-              <span className="text-[11px] text-[#FFB800]/50 font-mono">
+              <span className="text-xs text-[#FFB800]/60 font-mono">
                 {formatUSD(nextLevel.minValue)} &middot;{" "}
                 {progress.toFixed(1)}%
               </span>
@@ -315,14 +327,14 @@ export default function Home() {
           transition={{ delay: 0.5 }}
           className="mb-12"
         >
-          <h2 className="text-[11px] uppercase tracking-[0.2em] text-[#FFB800]/40 font-mono mb-4">
+          <h2 className="text-xs uppercase tracking-[0.2em] text-[#FFB800]/55 font-mono mb-4">
             achievements
           </h2>
           <Milestones milestones={milestones} />
         </motion.section>
 
         {/* Last updated */}
-        <div className="text-center text-[11px] text-white/25 font-mono tracking-wider">
+        <div className="text-center text-xs text-white/55 font-mono tracking-wider">
           {new Date(data.lastUpdated).toLocaleTimeString()} &middot; 30s
           balances &middot; 60s prices
         </div>

@@ -12,7 +12,7 @@ const toneColors: Record<StatusTone, string> = {
   positive: "text-[#39FF14]/60",
   exciting: "text-[#FFB800]/70",
   negative: "text-[#FF2D55]/55",
-  neutral: "text-white/40",
+  neutral: "text-white/55",
 };
 
 export function StatusMessage({ message, tone }: StatusMessageProps) {

@@ -21,14 +21,18 @@ export function useStatusMessage(
     tone: "neutral",
   });
   const lastSaveRef = useRef(0);
-  const computedRef = useRef(false);
+  // Capture the visit snapshot once per session so the "away" message stays stable
+  const visitSnapshotRef = useRef<ReturnType<typeof getLastVisit> | undefined>(undefined);
 
   useEffect(() => {
     if (totalValueUSD === null || change24h === null) return;
-    if (computedRef.current) return;
-    computedRef.current = true;
 
-    const lastVisit = getLastVisit();
+    // Read last visit only once per session
+    if (visitSnapshotRef.current === undefined) {
+      visitSnapshotRef.current = getLastVisit();
+    }
+    const lastVisit = visitSnapshotRef.current;
+
     const now = Date.now();
     const hour = new Date().getHours();
 
@@ -63,7 +67,6 @@ export function useStatusMessage(
         tone = "neutral";
       }
     } else {
-      // First visit
       message = "first time? grok's been busy";
       tone = "neutral";
     }

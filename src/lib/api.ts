@@ -1,4 +1,4 @@
-import { DEXSCREENER_API, COINGECKO_API, BLOCKSCOUT_API, GROK_WALLET, DRB_CONTRACT, WETH_CONTRACT } from "./constants";
+import { DEXSCREENER_API, COINGECKO_API, BLOCKSCOUT_API, GROK_WALLET, DRB_CONTRACT, WETH_CONTRACT, BLOCKS_7_DAYS } from "./constants";
 
 const BASE_RPC = "https://mainnet.base.org";
 
@@ -10,25 +10,40 @@ export async function rpcCall(method: string, params: unknown[]): Promise<unknow
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 }),
   });
+  if (!res.ok) throw new Error(`RPC HTTP error: ${res.status}`);
   const data = await res.json();
   if (data.error) throw new Error(data.error.message || "RPC error");
+  if (data.result === undefined || data.result === null) {
+    throw new Error("RPC returned no result");
+  }
   return data.result;
 }
 
 // --- Balances via RPC ---
 
+function parseHexBalance(result: unknown): number {
+  if (typeof result !== "string" || !result.startsWith("0x")) {
+    throw new Error("Invalid balance response format");
+  }
+  const parsed = parseInt(result, 16);
+  if (isNaN(parsed) || parsed < 0) {
+    throw new Error("Failed to parse balance");
+  }
+  return parsed / 1e18;
+}
+
 export async function fetchWETHBalance(): Promise<number> {
   const paddedAddress = "000000000000000000000000" + GROK_WALLET.slice(2);
   const data = `0x70a08231${paddedAddress}`;
-  const result = (await rpcCall("eth_call", [{ to: WETH_CONTRACT, data }, "latest"])) as string;
-  return parseInt(result, 16) / 1e18;
+  const result = await rpcCall("eth_call", [{ to: WETH_CONTRACT, data }, "latest"]);
+  return parseHexBalance(result);
 }
 
 export async function fetchDRBBalance(): Promise<number> {
   const paddedAddress = "000000000000000000000000" + GROK_WALLET.slice(2);
   const data = `0x70a08231${paddedAddress}`;
-  const result = (await rpcCall("eth_call", [{ to: DRB_CONTRACT, data }, "latest"])) as string;
-  return parseInt(result, 16) / 1e18;
+  const result = await rpcCall("eth_call", [{ to: DRB_CONTRACT, data }, "latest"]);
+  return parseHexBalance(result);
 }
 
 // --- Prices via DexScreener ---
@@ -41,6 +56,7 @@ export interface PriceData {
 export async function fetchPrices(): Promise<{ ethPrice: PriceData; drbPrice: PriceData }> {
   const url = `${DEXSCREENER_API}/latest/dex/tokens/${DRB_CONTRACT}`;
   const res = await fetch(url);
+  if (!res.ok) throw new Error(`DexScreener HTTP error: ${res.status}`);
   const data = await res.json();
   const pair = data.pairs?.[0];
 
@@ -51,10 +67,10 @@ export async function fetchPrices(): Promise<{ ethPrice: PriceData; drbPrice: Pr
     };
   }
 
-  const drbPriceUsd = parseFloat(pair.priceUsd || "0");
-  const priceNative = parseFloat(pair.priceNative || "0");
+  const drbPriceUsd = parseFloat(pair.priceUsd || "0") || 0;
+  const priceNative = parseFloat(pair.priceNative || "0") || 0;
   const ethPriceUsd = priceNative > 0 ? drbPriceUsd / priceNative : 0;
-  const drbChange24h = pair.priceChange?.h24 ?? 0;
+  const drbChange24h = Number(pair.priceChange?.h24) || 0;
 
   return {
     drbPrice: { usd: drbPriceUsd, usd_24h_change: drbChange24h },
@@ -145,8 +161,7 @@ export async function fetchRecentFees(): Promise<TokenTransfer[]> {
     const currentBlock = parseInt(currentBlockHex, 16);
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    const TOTAL_BLOCKS = 302_400; // ~7 days
-    const startBlock = currentBlock - TOTAL_BLOCKS;
+    const startBlock = currentBlock - BLOCKS_7_DAYS;
 
     // 2 parallel Blockscout queries instead of ~60 RPC calls
     const [drbTransfers, wethTransfers] = await Promise.all([
@@ -177,10 +192,13 @@ export async function fetchDRBPriceHistory(days = 7): Promise<PricePoint[]> {
     const res = await fetch(url);
     if (!res.ok) return [];
     const data = await res.json();
-    return (data.prices ?? []).map(([timestamp, price]: [number, number]) => ({
-      timestamp,
-      price,
-    }));
+    if (!data || !Array.isArray(data.prices)) return [];
+    return data.prices
+      .filter((p: unknown) => Array.isArray(p) && p.length >= 2)
+      .map(([timestamp, price]: [number, number]) => ({
+        timestamp,
+        price,
+      }));
   } catch {
     return [];
   }
@@ -208,6 +226,9 @@ export async function fetchOtherTokens(ethPrice: number): Promise<OtherTokensDat
   }
 
   const tokens = await res.json();
+  if (!Array.isArray(tokens)) {
+    return { othersValueUSD: ethValueUSD, othersTokenCount: ethBalance > 0.001 ? 1 : 0, ethBalance, ethValueUSD };
+  }
   let othersValueUSD = 0;
   let othersTokenCount = 0;
 
@@ -222,7 +243,7 @@ export async function fetchOtherTokens(ethPrice: number): Promise<OtherTokensDat
     if (addr === wethLower || addr === drbLower) continue;
 
     const decimals = parseInt(item.token?.decimals ?? "18", 10);
-    if (isNaN(decimals)) continue;
+    if (isNaN(decimals) || decimals < 0 || decimals > 77) continue;
 
     const rawValue = item.value ?? "0";
     const balance = Number(BigInt(rawValue)) / Math.pow(10, decimals);

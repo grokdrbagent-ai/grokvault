@@ -6,7 +6,7 @@ export function Footer() {
   return (
     <footer className="mt-16 pt-6 pb-8">
       <div className="glow-divider mb-6" />
-      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] font-mono">
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-mono">
         <a
           href={LINKS.buyDRB}
           target="_blank"
@@ -19,7 +19,7 @@ export function Footer() {
           href={LINKS.community}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-white/35 hover:text-white/60 transition-colors"
+          className="text-white/55 hover:text-white/70 transition-colors"
         >
           community
         </a>
@@ -27,7 +27,7 @@ export function Footer() {
           href={LINKS.twitter}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-white/35 hover:text-white/60 transition-colors"
+          className="text-white/55 hover:text-white/70 transition-colors"
         >
           twitter
         </a>
@@ -35,12 +35,12 @@ export function Footer() {
           href={LINKS.grokWallet}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-white/35 hover:text-white/60 transition-colors"
+          className="text-white/55 hover:text-white/70 transition-colors"
         >
           view wallet
         </a>
       </div>
-      <div className="text-center mt-4 text-[11px] text-white/20 font-mono">
+      <div className="text-center mt-4 text-xs text-white/55 font-mono">
         built by draco.base.eth
       </div>
     </footer>

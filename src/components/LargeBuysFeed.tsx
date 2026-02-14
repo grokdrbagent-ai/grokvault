@@ -25,14 +25,14 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
       {/* Section header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="live-dot" />
-        <h2 className="text-xs uppercase tracking-[0.15em] text-white/50 font-display font-semibold">
+        <h2 className="text-xs uppercase tracking-[0.15em] text-white/55 font-display font-semibold">
           large buys
         </h2>
-        <span className="text-[11px] text-white/35 font-mono">
+        <span className="text-xs text-white/55 font-mono">
           $10K+ &middot; 7d
         </span>
         <span className="flex-1" />
-        <span className="text-[11px] text-white/35 font-mono">
+        <span className="text-xs text-white/55 font-mono">
           {buys.length} detected
         </span>
       </div>
@@ -45,10 +45,10 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
         </div>
       ) : buys.length === 0 ? (
         <div className="rounded-lg border border-white/[0.04] bg-white/[0.01] py-8 text-center">
-          <div className="text-xs text-white/35 font-mono">
+          <div className="text-xs text-white/55 font-mono">
             no large buys detected in the last 7d
           </div>
-          <div className="text-[11px] text-white/25 font-mono mt-1">
+          <div className="text-xs text-white/55 font-mono mt-1">
             watching for $10K+ swaps
           </div>
         </div>
@@ -91,7 +91,7 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
                   </span>
 
                   {/* DRB amount */}
-                  <span className="text-[11px] text-white/50 font-mono">
+                  <span className="text-xs text-white/55 font-mono hidden sm:inline">
                     {formatTokenAmount(buy.drbAmount)} DRB
                   </span>
 
@@ -103,15 +103,15 @@ export function LargeBuysFeed({ buys, loading }: LargeBuysFeedProps) {
                     href={`https://basescan.org/address/${buy.buyer}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] text-white/35 hover:text-white/60 font-mono transition-colors"
+                    className="text-xs text-white/55 hover:text-white/70 font-mono transition-colors"
                   >
                     {shortenAddress(buy.buyer)}
                   </a>
 
                   {/* Time ago */}
                   <span
-                    className={`text-[11px] font-mono min-w-[40px] text-right ${
-                      isRecent ? "text-[#39FF14]/50" : "text-white/35"
+                    className={`text-xs font-mono min-w-[40px] text-right ${
+                      isRecent ? "text-[#39FF14]/60" : "text-white/55"
                     }`}
                   >
                     {timeAgo(buy.timestamp)}

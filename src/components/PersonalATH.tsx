@@ -17,8 +17,8 @@ export function PersonalATH({ ath, isNewATH }: PersonalATHProps) {
 
   return (
     <div
-      className={`text-[11px] font-mono mt-2 ${
-        isNewATH ? "text-[#00EAFF]/70 ath-glow" : "text-white/35"
+      className={`text-xs font-mono mt-2 ${
+        isNewATH ? "text-[#00EAFF]/70 ath-glow" : "text-white/55"
       }`}
     >
       {isNewATH ? "new ATH!" : "witnessed ATH"}: {formatUSD(ath.value)} — {dateStr}

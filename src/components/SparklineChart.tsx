@@ -18,7 +18,7 @@ export function SparklineChart({
 }: SparklineChartProps) {
   if (data.length < 2) {
     return (
-      <div className={`text-white/30 text-xs text-center py-8 ${className}`}>
+      <div className={`text-white/55 text-xs text-center py-8 ${className}`}>
         loading chart data...
       </div>
     );
@@ -59,8 +59,8 @@ export function SparklineChart({
     >
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full"
-        preserveAspectRatio="none"
+        className="w-full h-auto"
+        preserveAspectRatio="xMidYMid meet"
       >
         <defs>
           <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">

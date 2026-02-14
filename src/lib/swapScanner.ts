@@ -1,5 +1,5 @@
 import { rpcCall } from "@/lib/api";
-import { DRB_WETH_POOL, SWAP_EVENT_TOPIC, LARGE_BUY_THRESHOLD_USD } from "@/lib/constants";
+import { DRB_WETH_POOL, SWAP_EVENT_TOPIC, LARGE_BUY_THRESHOLD_USD, BLOCKS_7_DAYS } from "@/lib/constants";
 import { BLOCKSCOUT_API } from "@/lib/constants";
 
 export interface LargeBuy {
@@ -13,6 +13,9 @@ export interface LargeBuy {
 
 // Decode signed int256 from hex (two's complement)
 function decodeInt256(hex: string): bigint {
+  if (!/^[0-9a-fA-F]+$/.test(hex)) {
+    throw new Error(`Invalid hex for int256: ${hex.slice(0, 20)}`);
+  }
   const value = BigInt("0x" + hex);
   const MAX_INT256 = (BigInt(1) << BigInt(255)) - BigInt(1);
   if (value > MAX_INT256) {
@@ -107,10 +110,9 @@ export async function fetchLargeBuys(currentDRBPrice: number): Promise<LargeBuy[
     const currentBlock = parseInt(currentBlockHex, 16);
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    // Scan last ~7 days (302,400 blocks) split into 3 parallel ranges
-    const TOTAL_BLOCKS = 302_400;
-    const startBlock = currentBlock - TOTAL_BLOCKS;
-    const third = Math.floor(TOTAL_BLOCKS / 3);
+    // Scan last ~7 days split into 3 parallel ranges
+    const startBlock = currentBlock - BLOCKS_7_DAYS;
+    const third = Math.floor(BLOCKS_7_DAYS / 3);
 
     const [r1, r2, r3] = await Promise.all([
       scanRange(startBlock, startBlock + third, currentDRBPrice, currentTimestamp, currentBlock),

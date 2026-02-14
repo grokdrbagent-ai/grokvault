@@ -16,7 +16,16 @@ function setItem(key: string, value: string): void {
   try {
     localStorage.setItem(PREFIX + key, value);
   } catch {
-    // localStorage full or blocked
+    // localStorage full — try clearing old grokvault data to make room
+    try {
+      const keys = Object.keys(localStorage).filter((k) => k.startsWith(PREFIX));
+      if (keys.length > 0) {
+        localStorage.removeItem(keys[0]);
+        localStorage.setItem(PREFIX + key, value);
+      }
+    } catch {
+      // Truly blocked, give up silently
+    }
   }
 }
 
@@ -31,7 +40,10 @@ export function getATH(): ATHData | null {
   const value = getItem("ath_value");
   const timestamp = getItem("ath_timestamp");
   if (!value || !timestamp) return null;
-  return { value: parseFloat(value), timestamp: parseInt(timestamp, 10) };
+  const parsed = parseFloat(value);
+  const ts = parseInt(timestamp, 10);
+  if (isNaN(parsed) || isNaN(ts)) return null;
+  return { value: parsed, timestamp: ts };
 }
 
 export function updateATH(currentValue: number): { isNewATH: boolean; ath: ATHData } {

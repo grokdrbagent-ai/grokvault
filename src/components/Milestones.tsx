@@ -20,7 +20,7 @@ export function Milestones({ milestones }: MilestonesProps) {
             m.achieved ? "badge-achieved" : "badge-locked"
           }`}
         >
-          <span className={m.achieved ? "text-[#FFB800]" : "text-white/40"}>
+          <span className={m.achieved ? "text-[#FFB800]" : "text-white/55"}>
             {m.label}
           </span>
           {m.achieved && (

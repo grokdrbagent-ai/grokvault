@@ -27,13 +27,13 @@ export function StatCard({ label, value, subValue, delay = 0, accent }: StatCard
       transition={{ duration: 0.5, delay }}
       className="card-glow rounded-lg px-5 py-4"
     >
-      <div className={`text-[11px] uppercase tracking-[0.2em] mb-3 font-display ${labelColor}`}>
+      <div className={`text-xs uppercase tracking-[0.2em] mb-3 font-display ${labelColor}`}>
         {label}
       </div>
       <div className="text-lg font-semibold font-display tracking-tight text-white">
         {value}
       </div>
-      <div className="text-xs text-white/45 mt-1">
+      <div className="text-xs text-white/55 mt-1">
         {subValue}
       </div>
     </motion.div>

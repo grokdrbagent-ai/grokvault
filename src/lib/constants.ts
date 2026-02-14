@@ -8,8 +8,20 @@ export const DEXSCREENER_API = "https://api.dexscreener.com";
 export const COINGECKO_API = "https://api.coingecko.com/api/v3"; // fallback for historical data
 export const BLOCKSCOUT_API = "https://base.blockscout.com/api/v2";
 
-// Polling interval (ms)
+// Polling intervals (ms)
 export const REFRESH_INTERVAL = 60_000;
+export const POLLING = {
+  BALANCES_MS: 30_000,
+  PRICES_MS: 60_000,
+  FEES_MS: 60_000,
+  PRICE_HISTORY_MS: 300_000,
+  LARGE_BUYS_MS: 120_000,
+  OTHER_TOKENS_MS: 120_000,
+} as const;
+
+// Block constants
+export const BASE_BLOCK_TIME_SECONDS = 2;
+export const BLOCKS_7_DAYS = 302_400;
 
 // Level system
 export const LEVELS = [
