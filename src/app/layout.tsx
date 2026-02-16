@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { JetBrains_Mono, Chakra_Petch } from "next/font/google";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./globals.css";
+
+const GA_ID = "G-HHEFDPKNG7";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains",
@@ -48,6 +51,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}');
+          `}
+        </Script>
+      </head>
       <body className={`${jetbrainsMono.variable} ${chakraPetch.variable} font-mono antialiased scan-overlay`}>
         <ErrorBoundary>{children}</ErrorBoundary>
       </body>
