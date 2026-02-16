@@ -39,11 +39,18 @@ export function ActivityTicker({
     </span>
   ));
 
+  // Repeat enough copies so content always fills the viewport during scroll
+  const separator = <span className="text-white/40 mx-4">·</span>;
+
   return (
     <div className="ticker-container border-b border-white/[0.04] overflow-hidden">
       <div className="ticker-scroll text-xs font-mono whitespace-nowrap py-2">
-        <span className="ticker-content">{content}</span>
-        <span className="ticker-content ml-12" aria-hidden>{content}</span>
+        {Array.from({ length: 4 }, (_, i) => (
+          <span key={i} className="ticker-content" aria-hidden={i > 0 || undefined}>
+            {content}
+            {separator}
+          </span>
+        ))}
       </div>
     </div>
   );
