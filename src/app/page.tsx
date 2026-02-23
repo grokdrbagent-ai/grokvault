@@ -147,6 +147,22 @@ export default function Home() {
               dailyEarnings={earningsUSD}
             />
             <a
+              href={LINKS.community}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded border border-[#00EAFF]/15 px-3 py-1.5 text-xs font-mono text-[#00EAFF]/55 transition-all hover:text-[#00EAFF]/80 hover:border-[#00EAFF]/30 hover:bg-[#00EAFF]/[0.03]"
+            >
+              telegram
+            </a>
+            <a
+              href={LINKS.drbAgent}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded border border-[#FFB800]/15 px-3 py-1.5 text-xs font-mono text-[#FFB800]/55 transition-all hover:text-[#FFB800]/80 hover:border-[#FFB800]/30 hover:bg-[#FFB800]/[0.03]"
+            >
+              DRB agent
+            </a>
+            <a
               href={LINKS.grokWallet}
               target="_blank"
               rel="noopener noreferrer"

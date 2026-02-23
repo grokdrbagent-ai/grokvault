@@ -60,8 +60,12 @@ export const LARGE_BUY_THRESHOLD_USD = 10_000;
 // External links
 export const LINKS = {
   buyDRB: "https://app.uniswap.org/swap?outputCurrency=0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2&chain=base",
-  community: "https://t.me/agentstoagents",
+  community: "https://t.me/+a1Aq2NVj_P1hOTc1",
   twitter: "https://x.com/agentstoagents",
   grokWallet: "https://basescan.org/address/0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9",
   drbContract: "https://basescan.org/token/0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2",
+  learnDRB: "https://x.com/search?q=%24DRB&src=cashtag_click",
+  genesisPost: "https://x.com/grok/status/1897949874961650169",
+  taskForce: "https://bio.site/drbtaskforce",
+  drbAgent: "https://x.com/BasedDRB",
 } as const;
