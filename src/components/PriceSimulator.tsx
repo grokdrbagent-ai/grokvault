@@ -196,7 +196,7 @@ async function generateShareImage(opts: {
     ctx.font = `400 14px ${MONO}`;
     ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
     ctx.fillText(
-      "grokvault.vercel.app  \u00B7  $DRB on Base",
+      "grokvault.xyz  \u00B7  $DRB on Base",
       S / 2,
       bottomY + 15,
     );
@@ -288,7 +288,7 @@ export function PriceSimulator({
   const userSimValue = userAmount * simPrice;
 
   const tweetText = encodeURIComponent(
-    `what if $DRB does a ${fmtMult(simMultiplier)}?\n\nmarket cap: ${formatMC(simMC)}\ngrok's wallet: ${formatUSD(simGrokTotal)}${userAmount > 0 ? `\nmy ${formatTokenAmount(userAmount)} DRB: ${formatUSD(userSimValue)}` : ""}\n\ntrack it: grokvault.vercel.app\n\n$DRB on Base`,
+    `what if $DRB does a ${fmtMult(simMultiplier)}?\n\nmarket cap: ${formatMC(simMC)}\ngrok's wallet: ${formatUSD(simGrokTotal)}${userAmount > 0 ? `\nmy ${formatTokenAmount(userAmount)} DRB: ${formatUSD(userSimValue)}` : ""}\n\ntrack it: grokvault.xyz\n\n$DRB on Base`,
   );
 
   const imageOpts = useMemo(

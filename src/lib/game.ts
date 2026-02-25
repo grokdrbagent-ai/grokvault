@@ -65,7 +65,7 @@ export function generateTweetText(
 lvl ${level.level}: ${level.name}
 earning ${dailyEarnings}/week in swap fees
 
-track it live: grokvault.vercel.app
+track it live: grokvault.xyz
 
 $DRB on Base`;
 }
